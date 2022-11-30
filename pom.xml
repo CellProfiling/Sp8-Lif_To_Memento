@@ -15,7 +15,7 @@
  
 <!-- Plugin Information -->
     <name>Sp8Lif_To_Memento_JNH</name>
- 	<url>https://github.com/CellProfiling/Sp8Lif_To_Memento_JNH/</url>
+ 	<url>https://github.com/CellProfiling/Sp8-Lif_To_Memento</url>
 	<inceptionYear>2022</inceptionYear>
 	<description>FIJI plugin that reads .lif files from the Sp8 confocal microscope and outputs a file system with pngs for Memento.</description>
  	<organization>
@@ -71,7 +71,7 @@
 		<connection>scm:git:git://github.com/CellProfiling</connection>
 		<developerConnection>scm:git:git@github.com:CellProfiling</developerConnection>
 		<tag>HEAD</tag>
-		<url>https://github.com/CellProfiling/Sp8Lif_To_Memento_JNH</url>
+		<url>https://github.com/CellProfiling/Sp8-Lif_To_Memento</url>
 	</scm>
  	
  	<issueManagement>
