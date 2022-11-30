@@ -15,12 +15,12 @@
  
 <!-- Plugin Information -->
     <name>Sp8Lif_To_Memento_JNH</name>
- 	<url>https://github.com/hansenjn/Sp8Lif_To_Memento_JNH/</url>
+ 	<url>https://github.com/CellProfiling/Sp8Lif_To_Memento_JNH/</url>
 	<inceptionYear>2022</inceptionYear>
 	<description>FIJI plugin that reads .lif files from the Sp8 confocal microscope and outputs a file system with pngs for Memento.</description>
  	<organization>
-		<name>JNH</name>
-		<url>https://github.com/hansenjn/</url>
+		<name>CellProfiling</name>
+		<url>https://github.com/CellProfiling/</url>
 	</organization>
 		
 	<licenses>
@@ -36,7 +36,7 @@
             <id></id>
             <name>Jan Niklas Hansen</name>
             <email>jan.hansen@scilifelab.se</email>
-            <url>r</url>
+            <url>https://github.com/hansenjn</url>
             <organization></organization>
             <organizationUrl></organizationUrl>
             <roles>
@@ -68,15 +68,15 @@
 	</mailingLists>
  	
  	<scm>
-		<connection>scm:git:git://github.com/hansenjn</connection>
-		<developerConnection>scm:git:git@github.com:hansenjn</developerConnection>
+		<connection>scm:git:git://github.com/CellProfiling</connection>
+		<developerConnection>scm:git:git@github.com:CellProfiling</developerConnection>
 		<tag>HEAD</tag>
-		<url>https://github.com/hansenjn/Sp8Lif_To_Memento_JNH</url>
+		<url>https://github.com/CellProfiling/Sp8Lif_To_Memento_JNH</url>
 	</scm>
  	
  	<issueManagement>
 		<system>GitHub Issues</system>
-		<url>https://github.com/hansenjn/Sp8Lif_To_Memento_JNH/issues</url>
+		<url>https://github.com/CellProfiling/Sp8-Lif_To_Memento/issues</url>
 	</issueManagement>
  	
  	<ciManagement>
