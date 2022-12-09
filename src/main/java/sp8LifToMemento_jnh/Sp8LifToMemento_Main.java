@@ -82,7 +82,7 @@ public class Sp8LifToMemento_Main implements PlugIn {
 	ProgressDialog progress;
 	boolean processingDone = false;
 	boolean continueProcessing = true;
-
+	
 	// -----------------define params for Dialog-----------------
 	int tasks = 1;
 	
@@ -92,6 +92,8 @@ public class Sp8LifToMemento_Main implements PlugIn {
 	boolean relabelSeries = false;
 //	String preString = "TileScan 1/";
 //	String postString = ": 2048 x 2048; 60 planes (5C x 12Z)";
+	
+	boolean diagnosisLogging = true;
 	
 	String outPath = "E:" + System.getProperty("file.separator") + System.getProperty("file.separator") + "Sp8LifToMemento"
 			+ System.getProperty("file.separator");
@@ -196,8 +198,11 @@ public class Sp8LifToMemento_Main implements PlugIn {
 			for (int task = 0; task < tasks; task++) {
 				fullPath[task] = od.filesToOpen.get(task).toString();
 				IJ.log("ORIGINAL: " + fullPath[task]);
-				series[task] = "";
 				name[task] = od.filesToOpen.get(task).getName();
+				series[task] = name[task];
+				if(series[task].contains(".")) {
+					series[task] = series[task].substring(0,series[task].lastIndexOf("."));
+				}
 				dir[task] = od.filesToOpen.get(task).getParent() + System.getProperty("file.separator");
 			}
 		}
@@ -337,6 +342,8 @@ public class Sp8LifToMemento_Main implements PlugIn {
 		// ---------------------------------RUN TASKS----------------------------------
 		// &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
+		String [] namingInfo;
+		String region;
 		for (int task = 0; task < tasks; task++) {
 			running: while (continueProcessing) {
 				Date startDate = new Date();
@@ -381,11 +388,31 @@ public class Sp8LifToMemento_Main implements PlugIn {
 		   		
 		   		/**
 				 * TODO Write code for opening the file, adjusting LUT, saving the file
+				 * "Antibody/FieldOfView/PlaneZ/[channelC1, channelC2, channelC3...]"
 				 * */		
 				{
 					try {
-						
-						
+						if(relabelSeries) {
+							namingInfo = receiveWellInformationFromTable(series[task], lookUpTable);
+							region = getRegionIDFromSeriesName(series[task]);
+							
+							if(namingInfo == null) {
+								progress.notifyMessage("Task " + (task+1) + " - Could not find well information in csv file for " + series[task] + "! Will use series name instad.", ProgressDialog.LOG);
+								namingInfo = new String[] {"UNKNOWN","UNKNOWN",series[task],"UNKNOWN"};
+							}
+							if(region == null) {
+								progress.notifyMessage("Task " + (task+1) + " - Could not find region information in series name '" + series[task] + "'! Will use series ID instead.", ProgressDialog.LOG);
+								region = "Series_" + seriesID[task];
+							}
+							if(diagnosisLogging) {
+								progress.notifyMessage("Task " + (task+1) + " - found well information (Antibody: " + namingInfo [0] 
+										+ "; Protein: " + namingInfo [1] 
+												+ "; Plate: "  + namingInfo [2] 
+														+ "; Well: "  + namingInfo [3] + ") from series name (" + series[task] + ")", ProgressDialog.LOG);							
+							}
+						}else {
+							
+						}						
 					} catch (Exception e) {
 						String out = "";
 						for (int err = 0; err < e.getStackTrace().length; err++) {
@@ -473,6 +500,25 @@ public class Sp8LifToMemento_Main implements PlugIn {
 			e.printStackTrace();
 			return null;
 		}
+	}
+	
+	private static String [] receiveWellInformationFromTable(String seriesName, String [][] table) {
+		String wellID;
+		for(int i = 0; i < table[3].length; i++) {
+			wellID = "/" + table[3][i].substring(0,1) + "/" + table[3][i].substring(1) + "/";
+			if(seriesName.contains(wellID)) {
+				return new String[] {table[0][i],table[1][i],table[2][i],table[3][i]};
+			}
+		}		
+		return null;
+	}
+	
+	private static String getRegionIDFromSeriesName(String seriesName) {
+		//Example seriesName from a .lif tilescan: "Series_10: TileScan 1/H/5/R4: 2048 x 2048; 60 planes (5C x 12Z)"
+		if(seriesName.contains("/R") && seriesName.contains(": ") && seriesName.contains("; ") && seriesName.contains("(")) {			
+			return seriesName.substring(seriesName.lastIndexOf("/R")+1,seriesName.lastIndexOf(": "));
+		}
+		return null;
 	}
 	
 }// end main class
