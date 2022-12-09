@@ -11,7 +11,7 @@
  
  	<artifactId>Sp8Lif_To_Memento_JNH</artifactId>
  	<groupId>JNH</groupId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.2-SNAPSHOT</version>
  
 <!-- Plugin Information -->
     <name>Sp8Lif_To_Memento_JNH</name>
@@ -37,10 +37,9 @@
             <name>Jan Niklas Hansen</name>
             <email>jan.hansen@scilifelab.se</email>
             <url>https://github.com/hansenjn</url>
-            <organization></organization>
-            <organizationUrl></organizationUrl>
+            <organization>CellProfiling</organization>
+            <organizationUrl>https://github.com/CellProfiling/</organizationUrl>
             <roles>
-                <role>founder</role>
                 <role>lead</role>
                 <role>developer</role>
                 <role>debugger</role>
