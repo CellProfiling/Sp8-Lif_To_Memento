@@ -91,8 +91,6 @@ public class Sp8LifToMemento_Main implements PlugIn {
 	String selectedImageType = imageType [0];
 	
 	boolean relabelSeries = true;
-//	String preString = "TileScan 1/";
-//	String postString = ": 2048 x 2048; 60 planes (5C x 12Z)";
 	
 	static final String[] Colors = {"ORIGINAL", "Red", "Green", "Blue", "Cyan", "Magenta", "Yellow", "Grays"};
 	int numberOfChannels = 5;
@@ -132,37 +130,34 @@ public class Sp8LifToMemento_Main implements PlugIn {
 		gd.setInsets(0,0,0);	gd.addMessage(PLUGINNAME + ", Version " + PLUGINVERSION + ", \u00a9 2022 JN Hansen", SuperHeadingFont);	
 		
 
-		gd.setInsets(15,0,0);	gd.addMessage("Notes", SubHeadingFont);
+		gd.setInsets(0,0,0);	gd.addMessage("Notes", SubHeadingFont);
 		
 		gd.setInsets(0,0,0);		gd.addMessage("The plugin processes .lif files from 'TileScans' acquired with the Leica Sp8. TileScans here refers to automated", InstructionsFont);
 		gd.setInsets(0,0,0);		gd.addMessage("acquisition of many images on a multi-well plates, all stored in one .lif file.", InstructionsFont);
 		gd.setInsets(0,0,0);		gd.addMessage("The plugin generates an output directory with PNGs, which can be imported to Memento.", InstructionsFont);	
-		gd.setInsets(20,0,0);	gd.addMessage("This plugin runs only in FIJI (not in a blank ImageJ, where there is not OME BioFormats integration).", InstructionsFont);		
+		gd.setInsets(10,0,0);	gd.addMessage("This plugin runs only in FIJI (not in a blank ImageJ, where there is not OME BioFormats integration).", InstructionsFont);		
 					
-		gd.setInsets(15,0,0);	gd.addMessage("Processing Settings", SubHeadingFont);		
+		gd.setInsets(10,0,0);	gd.addMessage("Processing Settings", SubHeadingFont);		
 		gd.setInsets(0,0,0);		gd.addChoice("Image type", imageType, selectedImageType);
 
-		gd.setInsets(20,0,0);	gd.addStringField("Filepath for output folders", outPath);
+		gd.setInsets(0,0,0);	gd.addStringField("Filepath for output folders", outPath);
 		
-		gd.setInsets(20,0,0);	gd.addCheckbox("Change colors of the individual channels | number of channels", changeCColors);
-		gd.setInsets(-23,100,0);	gd.addNumericField("", numberOfChannels, 0);
-		gd.setInsets(-2,0,0);	gd.addMessage("When activating this checkbox you will receive a separate dialog to modify channel colors in the next step.");
+		gd.setInsets(0,0,0);	gd.addCheckbox("Change colors of the individual channels | number of channels", changeCColors);
+		gd.setInsets(-23,250,0);	gd.addNumericField("", numberOfChannels, 0);
+		gd.setInsets(-2,10,0);	gd.addMessage("When activating this checkbox you will receive a separate dialog to modify channel colors in the next step.", InstructionsFont);
 				
-		gd.setInsets(15,0,0);	gd.addMessage("Naming of output files", SubHeadingFont);
+		gd.setInsets(10,0,0);	gd.addMessage("Naming of output files", SubHeadingFont);
 		gd.setInsets(0,0,0);		gd.addCheckbox("Relabel seriesnames based on table", relabelSeries);		
-		gd.setInsets(-2,0,0);	gd.addMessage("When enabling this function you will be requested to select a csv file that contains");
-		gd.setInsets(-2,0,0);	gd.addMessage("the columns Antibody,Protein,Plate,Well. This file is used for relabeling", InstructionsFont);
-		gd.setInsets(-2,0,0);	gd.addMessage("the output images to Plate_Antibody_Protein_Well... and placing them in a specific folder structure:", InstructionsFont);
-		gd.setInsets(-2,0,0);	gd.addMessage("Antibody/FieldOfView/PlaneZ/[channelC1, channelC2, channelC3...]", InstructionsFont);
-//		gd.setInsets(10,0,0);		gd.addStringField("Ignored pre-String in series name", preString);
-//		gd.setInsets(10,0,0);		gd.addStringField("Ignored post-String in series name", postString);
-//		gd.setInsets(-2,0,0);		gd.addMessage("These strings indicate what is removed from the series name to find the well ID.", InstructionsFont);
-//		gd.setInsets(-2,0,0);		gd.addMessage("E.g., for a series name of 'Series_1: TileScan 1/H/7/R1: 2048 x 2048; 60 planes (5C x 12Z)'", InstructionsFont);
-//		gd.setInsets(-2,0,0);		gd.addMessage("setting here a pre-String of  'Series_1: TileScan 1/' and a post-String of ': 2048 x 2048; 60 planes (5C x 12Z)'", InstructionsFont);
-//		gd.setInsets(-2,0,0);		gd.addMessage("yields the desired series name of 'H/7' that can be used to find the well.", InstructionsFont);
+		gd.setInsets(0,10,0);	gd.addMessage("When enabling this function you will be requested to select a csv file that contains the columns ", InstructionsFont);
+		gd.setInsets(0,10,0);	gd.addMessage("Antibody,Protein,Plate,Well. This file is used for relabeling the output images to ", InstructionsFont);
+		gd.setInsets(0,10,0);	gd.addMessage("Plate_Antibody_Protein_Well... and placing them in a specific folder structure:", InstructionsFont);
+		gd.setInsets(0,10,0);	gd.addMessage("Antibody/Plate_Well_FieldOfView/zXX/...", InstructionsFont);
 		
-		gd.setInsets(15,0,0);	gd.addMessage("Input files", SubHeadingFont);
-		gd.setInsets(0,0,0);		gd.addMessage("A dialog will be shown when you press OK that allows you to list the .lif files to be processed.", InstructionsFont);
+		gd.setInsets(10,0,0);	gd.addMessage("Input files", SubHeadingFont);
+		gd.setInsets(0,0,0);		gd.addMessage("A dialog will be shown after this dialog, which allows you to list the .lif files to be processed.", InstructionsFont);
+		
+		gd.setInsets(10,0,0);	gd.addMessage("Extended modes", SubHeadingFont);
+		gd.setInsets(0,0,0);		gd.addCheckbox("Extended logging for diagnosis of errors", diagnosisLogging);		
 				
 		gd.showDialog();
 		//show Dialog-----------------------------------------------------------------
@@ -173,6 +168,7 @@ public class Sp8LifToMemento_Main implements PlugIn {
 		changeCColors = gd.getNextBoolean();
 		numberOfChannels = (int) gd.getNextNumber();	
 		relabelSeries = gd.getNextBoolean();
+		diagnosisLogging = gd.getNextBoolean();
 		//read and process variables--------------------------------------------------
 		if (gd.wasCanceled()) return;
 		
@@ -237,7 +233,7 @@ public class Sp8LifToMemento_Main implements PlugIn {
 			fullPath = new String[tasks];
 			for (int task = 0; task < tasks; task++) {
 				fullPath[task] = od.filesToOpen.get(task).toString();
-				IJ.log("ORIGINAL: " + fullPath[task]);
+				if(diagnosisLogging) IJ.log("ORIGINAL: " + fullPath[task]);
 				name[task] = od.filesToOpen.get(task).getName();
 				series[task] = name[task];
 				if(series[task].contains(".")) {
@@ -254,21 +250,23 @@ public class Sp8LifToMemento_Main implements PlugIn {
 		String [][] lookUpTable = null;
 		if(relabelSeries){			
 			new WaitForUserDialog("Please open the table .csv file with columns Antibody,Protein,Plate,Well in the following dialog!\n"
-					+"Make sure there is no duplicate entries in the Well column and you provide only a csv with information for the specific plate analyzed!").show();
+					+"Make sure there is no duplicate entries in the well column and that you provide only information for one plate (the specific plate analyzed)!").show();
 						
 	    	OpenDialog odTable;
 	    	odTable = new OpenDialog("Open table file with columns Antibody,Protein,Plate,Well", null);
 	    	tableFileDir = odTable.getDirectory();
     		tableFileName = odTable.getFileName();
     		lookUpTable = this.getTableFromCSV(tableFileDir + System.getProperty("file.separator") + tableFileName);
-    		IJ.log(lookUpTable[0][0]);
-    		IJ.log(lookUpTable[1][0]);
-    		IJ.log(lookUpTable[2][0]);
-    		IJ.log(lookUpTable[3][0]);
-    		IJ.log(lookUpTable[0][1]);
-    		IJ.log(lookUpTable[1][1]);
-    		IJ.log(lookUpTable[2][1]);
-    		IJ.log(lookUpTable[3][1]);
+    		if(diagnosisLogging) {
+        		IJ.log(lookUpTable[0][0]);
+        		IJ.log(lookUpTable[1][0]);
+        		IJ.log(lookUpTable[2][0]);
+        		IJ.log(lookUpTable[3][0]);
+        		IJ.log(lookUpTable[0][1]);
+        		IJ.log(lookUpTable[1][1]);
+        		IJ.log(lookUpTable[2][1]);
+        		IJ.log(lookUpTable[3][1]);    			
+    		}
 		}
 		
 		// Bioformats option - screen for series in lif file
@@ -353,11 +351,13 @@ public class Sp8LifToMemento_Main implements PlugIn {
 			}
 		}		
 		
-		for (int task = 0; task < tasks; task++) {
-			IJ.log("ORIGINAL: " + fullPath[task]);
-			IJ.log("series:" + series[task]);
-			IJ.log("name:" + name[task]);
-			IJ.log("dir:" + dir[task]);
+		if(diagnosisLogging) {
+			for (int task = 0; task < tasks; task++) {
+				IJ.log("ORIGINAL: " + fullPath[task]);
+				IJ.log("series:" + series[task]);
+				IJ.log("name:" + name[task]);
+				IJ.log("dir:" + dir[task]);
+			}			
 		}
 		
 		if (tasks == 0) {
