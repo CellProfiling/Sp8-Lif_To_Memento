@@ -11,7 +11,7 @@
  
  	<artifactId>Sp8Lif_To_Memento_JNH</artifactId>
  	<groupId>JNH</groupId>
-    <version>0.0.5-SNAPSHOT</version>
+    <version>0.0.1-SNAPSHOT</version>
  
 <!-- Plugin Information -->
     <name>Sp8Lif_To_Memento_JNH</name>
