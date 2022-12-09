@@ -67,3 +67,11 @@ When confirming the settings dialog (and eventually also the channel-color-setti
    <img src="https://user-images.githubusercontent.com/27991883/206780747-f8f488a1-7ee2-4fc3-9171-a66901347ea5.png" width=300>
 </p>
 
+Next a dialog pops up asking you to select the table.csv file in the next dialog. Confirm this dialog.
+
+![image](https://user-images.githubusercontent.com/27991883/206784843-e185295d-c010-41c0-a01d-7ab65c900418.png)
+
+In the next dialog select the csv file you want to provide.
+
+To be continued....
+
