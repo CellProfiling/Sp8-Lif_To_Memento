@@ -29,30 +29,20 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.Locale;
 
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
-import javax.swing.UIManager;
-
 import ij.IJ;
 import ij.ImagePlus;
-import ij.WindowManager;
 import ij.gui.GenericDialog;
 import ij.gui.WaitForUserDialog;
 import ij.io.OpenDialog;
 import ij.plugin.PlugIn;
-import loci.formats.*;
 import loci.formats.FormatException;
 import loci.plugins.BF;
 import loci.plugins.in.ImportProcess;
 import loci.plugins.in.ImporterOptions;
-import ome.units.*;
-import thredds.catalog2.xml.parser.ThreddsXmlParserIssue;
 
 public class Sp8LifToMemento_Main implements PlugIn {
 	// Name variables
@@ -256,7 +246,7 @@ public class Sp8LifToMemento_Main implements PlugIn {
 	    	odTable = new OpenDialog("Open table file with columns Antibody,Protein,Plate,Well", null);
 	    	tableFileDir = odTable.getDirectory();
     		tableFileName = odTable.getFileName();
-    		lookUpTable = this.getTableFromCSV(tableFileDir + System.getProperty("file.separator") + tableFileName);
+    		lookUpTable = getTableFromCSV(tableFileDir + System.getProperty("file.separator") + tableFileName);
     		if(diagnosisLogging) {
         		IJ.log(lookUpTable[0][0]);
         		IJ.log(lookUpTable[1][0]);
@@ -387,7 +377,6 @@ public class Sp8LifToMemento_Main implements PlugIn {
 		String region;
 		for (int task = 0; task < tasks; task++) {
 			running: while (continueProcessing) {
-				Date startDate = new Date();
 				progress.updateBarText("in progress...");
 
 				/**
@@ -728,7 +717,7 @@ public class Sp8LifToMemento_Main implements PlugIn {
 	 * If the maximum is below 255 it sets the maximum to 255. 
 	 * */
 	private void autoAdjustMinMax(ImagePlus imp) {
-		double min, max;
+		double max;
 		int index = 0;
 		double pxVal;
 		for(int c = 0; c < imp.getNChannels(); c++){
