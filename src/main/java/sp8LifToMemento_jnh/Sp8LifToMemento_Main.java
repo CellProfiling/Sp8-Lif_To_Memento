@@ -1,7 +1,7 @@
 package sp8LifToMemento_jnh;
 
 /** ===============================================================================
-* Sp8Lif_To_Memento ImageJ/FIJI Plugin v0.0.1
+* Sp8Lif_To_Memento ImageJ/FIJI Plugin v0.0.2
 * 
 * This program is free software; you can redistribute it and/or
 * modify it under the terms of the GNU General Public License
@@ -15,13 +15,22 @@ package sp8LifToMemento_jnh;
 * See the GNU General Public License for more details.
 *  
 * Copyright (C) Jan Niklas Hansen
-* Date: November, 2022 (This Version: November 30, 2022)
+* Date: November, 2022 (This Version: December 09, 2022)
 *   
 * For any questions please feel free to contact me (jan.hansen@scilifelab.se).
 * =============================================================================== */
 
+import java.awt.Color;
 import java.awt.Font;
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.Toolkit;
 import java.awt.event.WindowEvent;
+import java.awt.image.BufferedImage;
+import java.awt.image.FilteredImageSource;
+import java.awt.image.ImageFilter;
+import java.awt.image.ImageProducer;
+import java.awt.image.RGBImageFilter;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -32,6 +41,8 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Locale;
+
+import javax.imageio.ImageIO;
 
 import ij.IJ;
 import ij.ImagePlus;
@@ -47,7 +58,7 @@ import loci.plugins.in.ImporterOptions;
 public class Sp8LifToMemento_Main implements PlugIn {
 	// Name variables
 	static final String PLUGINNAME = "Sp8Lif_To_Memento";
-	static final String PLUGINVERSION = "0.0.1";
+	static final String PLUGINVERSION = "0.0.2";
 
 	// Fix fonts
 	static final Font SuperHeadingFont = new Font("Sansserif", Font.BOLD, 16);
@@ -130,9 +141,9 @@ public class Sp8LifToMemento_Main implements PlugIn {
 		gd.setInsets(10,0,0);	gd.addMessage("Processing Settings", SubHeadingFont);		
 		gd.setInsets(0,0,0);		gd.addChoice("Image type", imageType, selectedImageType);
 
-		gd.setInsets(0,0,0);	gd.addStringField("Filepath for output folders", outPath);
+		gd.setInsets(0,0,0);		gd.addStringField("Filepath for output folders", outPath);
 		
-		gd.setInsets(0,0,0);	gd.addCheckbox("Change colors of the individual channels | number of channels", changeCColors);
+		gd.setInsets(0,0,0);		gd.addCheckbox("Change colors of the individual channels | number of channels", changeCColors);
 		gd.setInsets(-23,250,0);	gd.addNumericField("", numberOfChannels, 0);
 		gd.setInsets(-2,10,0);	gd.addMessage("When activating this checkbox you will receive a separate dialog to modify channel colors in the next step.", InstructionsFont);
 				
@@ -465,12 +476,12 @@ public class Sp8LifToMemento_Main implements PlugIn {
 					String filename;
 					if(namingInfo[0].equals("UNKNOWN")) {
 						newF = new File(outPath + System.getProperty("file.separator") + name[task] + System.getProperty("file.separator") + region + System.getProperty("file.separator"));
-						filename = name[task] + "_" + region;
+						filename = "";
 					}else {
 						newF = new File(outPath + System.getProperty("file.separator") + namingInfo[0] +"_" + namingInfo[1] 
 								+ System.getProperty("file.separator") + namingInfo[2] + "_" + namingInfo[3] + "_"+ region
 								+ System.getProperty("file.separator"));
-						filename = namingInfo[2] + "_" + namingInfo[0] + "_" + namingInfo[1] + "_" + namingInfo[3] + "_" + region;
+						filename = "";
 					}
 					if(!newF.exists())	newF.mkdirs();
 					
@@ -639,20 +650,11 @@ public class Sp8LifToMemento_Main implements PlugIn {
 					}
 					
 					indivOutPath += System.getProperty("file.separator") + fileName;
-					if(s < 10) {
-						indivOutPath += "_z0" + s;
-					}else {
-						indivOutPath += "_z" + s;
-					}
-					if(imp.getNFrames()>1) {
-						if(t < 10 && imp.getNFrames()<=100) {
-							indivOutPath += "_t0" + t;
-						}else {
-							indivOutPath += "_t" + t;
-						}
+					if(!fileName.equals("")) {
+						indivOutPath += "_";
 					}
 					
-					indivOutPath += "_C" + c + ".png";
+					indivOutPath += "C" + c + ".png";
 					
 					if(changeCColors && c < selectedChannelColors.length){
 						color = selectedChannelColors [c];
@@ -665,7 +667,15 @@ public class Sp8LifToMemento_Main implements PlugIn {
 //					new WaitForUserDialog("toPNG").show();
 //					impNew.hide();
 					
-					IJ.saveAs(impNew, "PNG", indivOutPath);
+					BufferedImage bi = impNew.getBufferedImage();
+					
+					Image img = colorToTransparent(bi, Color.BLACK);
+					
+					bi = imageToBuffered(img, bi.getWidth(), bi.getHeight());
+					
+					this.saveBufferedImageAsPNG(bi, indivOutPath);
+					
+//					IJ.saveAs(impNew, "PNG", indivOutPath);
 					impNew.changes = false;
 					impNew.close();
 				}
@@ -673,7 +683,44 @@ public class Sp8LifToMemento_Main implements PlugIn {
 		}
 	}
 	
+	private void saveBufferedImageAsPNG(BufferedImage bi, String path) {
+		try {
+			ImageIO.write(bi, "png", new File(path));
+		} catch (IOException e) {
+			IJ.error("Saving error PNG");
+			e.printStackTrace();
+		}
+	}
 
+	private BufferedImage imageToBuffered (Image inImage, int width, int height){
+		BufferedImage outBI = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+		Graphics2D g = outBI.createGraphics();
+		g.drawImage(inImage, 0, 0, null);
+		g.dispose();
+		return outBI;
+	}
+
+	public static Image colorToTransparent(BufferedImage bi, final Color color) {
+		ImageFilter filter = new RGBImageFilter() {
+			//Set alpha bits to opaque for the color we want to use
+			public int marker = color.getRGB() | 0xFF000000;
+
+			public final int filterRGB(int x, int y, int rgb) {
+				if ((rgb | 0xFF000000) == marker) {
+					//Assign zero to the alpha bits to make it transparent
+					return 0x00FFFFFF & rgb;
+				} else {
+					// nothing to do
+					return rgb;
+				}
+			}
+		};
+
+		ImageProducer iProd = new FilteredImageSource(bi.getSource(), filter);
+		return Toolkit.getDefaultToolkit().createImage(iProd);
+	}
+	  
+	  
 	/**
 	 * @param channel: 1 <= channel,slice,frame <= # channels,slices,frames
 	 * @param color: "ORIGINAL" (no change of Color), "Red", "Green", "Blue", "Cyan", "Magenta", "Yellow", "Grays"
