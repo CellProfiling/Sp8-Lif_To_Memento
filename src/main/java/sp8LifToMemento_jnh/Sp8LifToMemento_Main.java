@@ -89,7 +89,7 @@ public class Sp8LifToMemento_Main implements PlugIn {
 	String imageType [] = new String [] {".lif 3D"};
 	String selectedImageType = imageType [0];
 	
-	boolean relabelSeries = false;
+	boolean relabelSeries = true;
 //	String preString = "TileScan 1/";
 //	String postString = ": 2048 x 2048; 60 planes (5C x 12Z)";
 	
@@ -388,7 +388,6 @@ public class Sp8LifToMemento_Main implements PlugIn {
 		   		
 		   		/**
 				 * TODO Write code for opening the file, adjusting LUT, saving the file
-				 * "Antibody/FieldOfView/PlaneZ/[channelC1, channelC2, channelC3...]"
 				 * */		
 				{
 					try {
@@ -398,7 +397,7 @@ public class Sp8LifToMemento_Main implements PlugIn {
 							
 							if(namingInfo == null) {
 								progress.notifyMessage("Task " + (task+1) + " - Could not find well information in csv file for " + series[task] + "! Will use series name instad.", ProgressDialog.LOG);
-								namingInfo = new String[] {"UNKNOWN","UNKNOWN",series[task],"UNKNOWN"};
+								namingInfo = new String[] {"UNKNOWN","UNKNOWN","UNKNOWN","UNKNOWN"};
 							}
 							if(region == null) {
 								progress.notifyMessage("Task " + (task+1) + " - Could not find region information in series name '" + series[task] + "'! Will use series ID instead.", ProgressDialog.LOG);
@@ -411,7 +410,8 @@ public class Sp8LifToMemento_Main implements PlugIn {
 														+ "; Well: "  + namingInfo [3] + ") from series name (" + series[task] + ")", ProgressDialog.LOG);							
 							}
 						}else {
-							
+							namingInfo = new String[] {"UNKNOWN","UNKNOWN","UNKNOWN","UNKNOWN"};
+							region = "Series_" + seriesID[task];
 						}						
 					} catch (Exception e) {
 						String out = "";
@@ -423,6 +423,33 @@ public class Sp8LifToMemento_Main implements PlugIn {
 								ProgressDialog.ERROR);
 						break running;
 					}
+					
+					imp.show();
+					new WaitForUserDialog("Before adjusting").show();
+					autoAdjustMinMax(imp);
+					imp.updateAndRepaintWindow();					
+					new WaitForUserDialog("After adjusting").show();
+					
+					//Create folder structure and save images
+					//"Antibody/FieldOfView/PlaneZ/[channelC1, channelC2, channelC3...]"
+					
+					File newF;
+					String filename;
+					if(namingInfo[0].equals("UNKNOWN")) {
+						newF = new File(outPath + System.getProperty("file.separator") + name[task] + System.getProperty("file.separator") + region + System.getProperty("file.separator"));
+						filename = name[task] + "_" + region;
+					}else {
+						newF = new File(outPath + System.getProperty("file.separator") + namingInfo[0] +"_" + namingInfo[1] 
+								+ System.getProperty("file.separator") + namingInfo[2] + "_" + namingInfo[3] + "_"+ region
+								+ System.getProperty("file.separator"));
+						filename = namingInfo[2] + "_" + namingInfo[0] + "_" + namingInfo[1] + "_" + namingInfo[3] + "_" + region;
+					}
+					if(!newF.exists())	newF.mkdirs();
+					
+					saveIndividualImages(imp, newF.getAbsolutePath() + System.getProperty("file.separator"), filename);	
+					
+					new WaitForUserDialog("After adjusting").show();
+					imp.hide();
 				}
 
 				imp.changes = false;
@@ -519,6 +546,154 @@ public class Sp8LifToMemento_Main implements PlugIn {
 			return seriesName.substring(seriesName.lastIndexOf("/R")+1,seriesName.lastIndexOf(": "));
 		}
 		return null;
+	}
+	
+	/**
+	 * @param channel: 1 <= channel,slice,frame <= # channels,slices,frames
+	 * */
+	private static void saveIndividualImages(ImagePlus imp, String saveFolder, String fileName) {		
+		//Making the folders required
+		String indivOutPath;
+		File indivOutFile;
+		for(int s = 0; s < imp.getNSlices(); s++) {			
+			for(int t = 0; t < imp.getNFrames(); t++) {
+				indivOutPath = saveFolder + System.getProperty("file.separator");
+				if(s < 10) {
+					indivOutPath += "z0" + s;
+				}else {
+					indivOutPath += "z" + s;
+				}
+				if(imp.getNFrames()>1) {
+					if(t < 10 && imp.getNFrames()<=100) {
+						indivOutPath += "_t0" + t;
+					}else {
+						indivOutPath += "_t" + t;
+					}
+				}				
+
+				indivOutFile = new File(indivOutPath);
+				if(!indivOutFile.exists()) indivOutFile.mkdir();
+			}			
+		}
+				
+//		String channelsActive = "";
+		ImagePlus impNew;
+		for(int c = 0; c < imp.getNChannels(); c++){
+//			channelsActive = "";
+//			for(int ca = 0; ca < imp.getNChannels(); ca++) {
+//				if(ca == c) {
+//					channelsActive += "1";					
+//				}else {
+//					channelsActive += "0";
+//				}
+//			}
+//			imp.setActiveChannels(channelsActive);
+//			
+			for(int s = 0; s < imp.getNSlices(); s++) {
+				for(int t = 0; t < imp.getNFrames(); t++) {
+//					imp.setPosition(c+1, s+1, t+1);
+					
+					indivOutPath = saveFolder + System.getProperty("file.separator");
+					
+					if(s < 10) {
+						indivOutPath += "z0" + s;
+					}else {
+						indivOutPath += "z" + s;
+					}
+					if(imp.getNFrames()>1) {
+						if(t < 10 && imp.getNFrames()<=100) {
+							indivOutPath += "_t0" + t;
+						}else {
+							indivOutPath += "_t" + t;
+						}
+					}
+					
+					indivOutPath += System.getProperty("file.separator") + fileName;
+					if(s < 10) {
+						indivOutPath += "_z0" + s;
+					}else {
+						indivOutPath += "_z" + s;
+					}
+					if(imp.getNFrames()>1) {
+						if(t < 10 && imp.getNFrames()<=100) {
+							indivOutPath += "_t0" + t;
+						}else {
+							indivOutPath += "_t" + t;
+						}
+					}
+					
+					indivOutPath += "_C" + c + ".png";
+					
+					impNew = getIndividualImage(imp, c+1, s+1, t+1, false);
+					
+//					impNew.show();
+//					new WaitForUserDialog("toPNG").show();
+//					impNew.hide();
+					
+					IJ.saveAs(impNew, "PNG", indivOutPath);
+					impNew.changes = false;
+					impNew.close();
+				}
+			}
+		}
+	}
+	
+
+	/**
+	 * @param channel: 1 <= channel,slice,frame <= # channels,slices,frames
+	 * */
+	private static ImagePlus getIndividualImage (ImagePlus imp, int channel, int slice, int frame, boolean copyOverlay){
+		ImagePlus impNew = IJ.createHyperStack("channel image", imp.getWidth(), imp.getHeight(), 1, 1, 1, imp.getBitDepth());
+		int index = 0, indexNew = 0;
+		
+		index = imp.getStackIndex(channel, slice, frame)-1;
+		indexNew = impNew.getStackIndex(1, 1, 1)-1;
+		for(int x = 0; x < imp.getWidth(); x++){
+			for(int y = 0; y < imp.getHeight(); y++){
+				impNew.getStack().setVoxel(x, y, indexNew, imp.getStack().getVoxel(x, y, index));		
+			}
+		}
+		
+		imp.setC(channel);
+		imp.setT(frame);
+		imp.setSlice(slice);
+		
+		impNew.setDisplayRange(imp.getDisplayRangeMin(),imp.getDisplayRangeMax());
+		
+		impNew.setLut(imp.getLuts()[channel-1]);
+		
+		impNew.setCalibration(imp.getCalibration());
+		
+		if(copyOverlay)	impNew.setOverlay(imp.getOverlay().duplicate());
+		
+		return impNew;
+	}
+	
+	/**
+	 * Finds the maximum intensity value in each channel and sets the display to 0 to maximum.
+	 * If the maximum is below 255 it sets the maximum to 255. 
+	 * */
+	private void autoAdjustMinMax(ImagePlus imp) {
+		double min, max;
+		int index = 0;
+		double pxVal;
+		for(int c = 0; c < imp.getNChannels(); c++){
+			max = Double.NEGATIVE_INFINITY;
+			for(int t = 0; t < imp.getNFrames(); t++) {
+				for(int s = 0; s < imp.getNSlices(); s++) {
+					for(int x = 0; x < imp.getWidth(); x++){
+						for(int y = 0; y < imp.getHeight(); y++){
+							index = imp.getStackIndex(c+1, s+1, t+1)-1;
+							pxVal = imp.getStack().getVoxel(x, y, index);
+							if(pxVal > max) max = pxVal;
+						}
+					}							
+				}
+			}
+			imp.setC(c+1);
+			if(max < 255.0)	max = 255.0;
+			imp.setDisplayRange(0, max);
+		}
 	}
 	
 }// end main class
