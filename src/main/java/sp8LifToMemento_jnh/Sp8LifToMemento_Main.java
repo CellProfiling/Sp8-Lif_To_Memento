@@ -52,6 +52,7 @@ import loci.plugins.BF;
 import loci.plugins.in.ImportProcess;
 import loci.plugins.in.ImporterOptions;
 import ome.units.*;
+import thredds.catalog2.xml.parser.ThreddsXmlParserIssue;
 
 public class Sp8LifToMemento_Main implements PlugIn {
 	// Name variables
@@ -93,6 +94,11 @@ public class Sp8LifToMemento_Main implements PlugIn {
 //	String preString = "TileScan 1/";
 //	String postString = ": 2048 x 2048; 60 planes (5C x 12Z)";
 	
+	static final String[] Colors = {"ORIGINAL", "Red", "Green", "Blue", "Cyan", "Magenta", "Yellow", "Grays"};
+	int numberOfChannels = 5;
+	String selectedChannelColors [] = new String[] {"ORIGINAL", "ORIGINAL", "ORIGINAL", "ORIGINAL", "ORIGINAL", "ORIGINAL"};
+	boolean changeCColors = false;
+	
 	boolean diagnosisLogging = true;
 	
 	String outPath = "E:" + System.getProperty("file.separator") + System.getProperty("file.separator") + "Sp8LifToMemento"
@@ -126,18 +132,22 @@ public class Sp8LifToMemento_Main implements PlugIn {
 		gd.setInsets(0,0,0);	gd.addMessage(PLUGINNAME + ", Version " + PLUGINVERSION + ", \u00a9 2022 JN Hansen", SuperHeadingFont);	
 		
 
-		gd.setInsets(15,0,0);	gd.addMessage("Notes:", SubHeadingFont);
+		gd.setInsets(15,0,0);	gd.addMessage("Notes", SubHeadingFont);
 		
-		gd.setInsets(0,0,0);		gd.addMessage("The plugin processes .lif files from 'TileScans' acquired with the Leica Sp8. TileScans here refers to automated acquisition of many", InstructionsFont);
-		gd.setInsets(0,0,0);		gd.addMessage("images on a multi-well plates, all stored in one .lif file.", InstructionsFont);
+		gd.setInsets(0,0,0);		gd.addMessage("The plugin processes .lif files from 'TileScans' acquired with the Leica Sp8. TileScans here refers to automated", InstructionsFont);
+		gd.setInsets(0,0,0);		gd.addMessage("acquisition of many images on a multi-well plates, all stored in one .lif file.", InstructionsFont);
 		gd.setInsets(0,0,0);		gd.addMessage("The plugin generates an output directory with PNGs, which can be imported to Memento.", InstructionsFont);	
 		gd.setInsets(20,0,0);	gd.addMessage("This plugin runs only in FIJI (not in a blank ImageJ, where there is not OME BioFormats integration).", InstructionsFont);		
 					
 		gd.setInsets(15,0,0);	gd.addMessage("Processing Settings", SubHeadingFont);		
 		gd.setInsets(0,0,0);		gd.addChoice("Image type", imageType, selectedImageType);
 
-		gd.setInsets(20,0,0);	gd.addStringField("Filepath to output file", outPath);
+		gd.setInsets(20,0,0);	gd.addStringField("Filepath for output folders", outPath);
 		
+		gd.setInsets(20,0,0);	gd.addCheckbox("Change colors of the individual channels | number of channels", changeCColors);
+		gd.setInsets(-23,100,0);	gd.addNumericField("", numberOfChannels, 0);
+		gd.setInsets(-2,0,0);	gd.addMessage("When activating this checkbox you will receive a separate dialog to modify channel colors in the next step.");
+				
 		gd.setInsets(15,0,0);	gd.addMessage("Naming of output files", SubHeadingFont);
 		gd.setInsets(0,0,0);		gd.addCheckbox("Relabel seriesnames based on table", relabelSeries);		
 		gd.setInsets(-2,0,0);	gd.addMessage("When enabling this function you will be requested to select a csv file that contains");
@@ -160,9 +170,39 @@ public class Sp8LifToMemento_Main implements PlugIn {
 		//read and process variables--------------------------------------------------	
 		selectedImageType = gd.getNextChoice();
 		outPath = gd.getNextString();
+		changeCColors = gd.getNextBoolean();
+		numberOfChannels = (int) gd.getNextNumber();	
 		relabelSeries = gd.getNextBoolean();
 		//read and process variables--------------------------------------------------
 		if (gd.wasCanceled()) return;
+		
+		if(changeCColors) {
+			selectedChannelColors = new String[numberOfChannels];
+			for(int c = 0; c < numberOfChannels; c++) {
+				selectedChannelColors [c] = "ORIGINAL";
+			}
+			
+			gd = new GenericDialog(PLUGINNAME + " - set parameters");	
+			//show Dialog-----------------------------------------------------------------
+			gd.setInsets(0,0,0);	gd.addMessage(PLUGINNAME + ", Version " + PLUGINVERSION + ", \u00a9 2022 JN Hansen", SuperHeadingFont);	
+			
+			gd.setInsets(15,0,0);	gd.addMessage("Modify channel colors for output", SubHeadingFont);
+			for(int c = 0; c < numberOfChannels; c++) {
+				gd.setInsets(0,0,0);		gd.addChoice("Channel " + (c+1) 
+					+ " - Color:", Colors, selectedChannelColors [c]);				
+			}
+			
+			gd.showDialog();
+			//show Dialog-----------------------------------------------------------------
+
+			//read and process variables--------------------------------------------------	
+			for(int c = 0; c < numberOfChannels; c++) {
+				selectedChannelColors [c] = gd.getNextChoice();
+			}			
+			//read and process variables--------------------------------------------------
+			if (gd.wasCanceled()) return;
+		}	
+		
 		
 		// &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 		// -------------------------------LOAD FILES-----------------------------------
@@ -213,7 +253,8 @@ public class Sp8LifToMemento_Main implements PlugIn {
 		String tableFileName = "";
 		String [][] lookUpTable = null;
 		if(relabelSeries){			
-			new WaitForUserDialog("Please open the table .csv file with columns Antibody,Protein,Plate,Well in the following dialog!").show();
+			new WaitForUserDialog("Please open the table .csv file with columns Antibody,Protein,Plate,Well in the following dialog!\n"
+					+"Make sure there is no duplicate entries in the Well column and you provide only a csv with information for the specific plate analyzed!").show();
 						
 	    	OpenDialog odTable;
 	    	odTable = new OpenDialog("Open table file with columns Antibody,Protein,Plate,Well", null);
@@ -424,11 +465,13 @@ public class Sp8LifToMemento_Main implements PlugIn {
 						break running;
 					}
 					
-					imp.show();
-					new WaitForUserDialog("Before adjusting").show();
+//					imp.show();
+//					new WaitForUserDialog("Before adjusting").show();
+					
 					autoAdjustMinMax(imp);
-					imp.updateAndRepaintWindow();					
-					new WaitForUserDialog("After adjusting").show();
+					
+//					imp.updateAndRepaintWindow();					
+//					new WaitForUserDialog("After adjusting").show();
 					
 					//Create folder structure and save images
 					//"Antibody/FieldOfView/PlaneZ/[channelC1, channelC2, channelC3...]"
@@ -448,8 +491,8 @@ public class Sp8LifToMemento_Main implements PlugIn {
 					
 					saveIndividualImages(imp, newF.getAbsolutePath() + System.getProperty("file.separator"), filename);	
 					
-					new WaitForUserDialog("After adjusting").show();
-					imp.hide();
+//					new WaitForUserDialog("After adjusting").show();
+//					imp.hide();
 				}
 
 				imp.changes = false;
@@ -551,7 +594,7 @@ public class Sp8LifToMemento_Main implements PlugIn {
 	/**
 	 * @param channel: 1 <= channel,slice,frame <= # channels,slices,frames
 	 * */
-	private static void saveIndividualImages(ImagePlus imp, String saveFolder, String fileName) {		
+	private void saveIndividualImages(ImagePlus imp, String saveFolder, String fileName) {		
 		//Making the folders required
 		String indivOutPath;
 		File indivOutFile;
@@ -578,6 +621,7 @@ public class Sp8LifToMemento_Main implements PlugIn {
 				
 //		String channelsActive = "";
 		ImagePlus impNew;
+		String color;
 		for(int c = 0; c < imp.getNChannels(); c++){
 //			channelsActive = "";
 //			for(int ca = 0; ca < imp.getNChannels(); ca++) {
@@ -624,7 +668,12 @@ public class Sp8LifToMemento_Main implements PlugIn {
 					
 					indivOutPath += "_C" + c + ".png";
 					
-					impNew = getIndividualImage(imp, c+1, s+1, t+1, false);
+					if(changeCColors && c < selectedChannelColors.length){
+						color = selectedChannelColors [c];
+					}else {
+						color = "ORIGINAL";
+					}
+					impNew = getIndividualImage(imp, c+1, s+1, t+1, false, color);
 					
 //					impNew.show();
 //					new WaitForUserDialog("toPNG").show();
@@ -641,8 +690,9 @@ public class Sp8LifToMemento_Main implements PlugIn {
 
 	/**
 	 * @param channel: 1 <= channel,slice,frame <= # channels,slices,frames
+	 * @param color: "ORIGINAL" (no change of Color), "Red", "Green", "Blue", "Cyan", "Magenta", "Yellow", "Grays"
 	 * */
-	private static ImagePlus getIndividualImage (ImagePlus imp, int channel, int slice, int frame, boolean copyOverlay){
+	private static ImagePlus getIndividualImage (ImagePlus imp, int channel, int slice, int frame, boolean copyOverlay, String color){
 		ImagePlus impNew = IJ.createHyperStack("channel image", imp.getWidth(), imp.getHeight(), 1, 1, 1, imp.getBitDepth());
 		int index = 0, indexNew = 0;
 		
@@ -660,7 +710,11 @@ public class Sp8LifToMemento_Main implements PlugIn {
 		
 		impNew.setDisplayRange(imp.getDisplayRangeMin(),imp.getDisplayRangeMax());
 		
-		impNew.setLut(imp.getLuts()[channel-1]);
+		if(color.equals("ORIGINAL")) {
+			impNew.setLut(imp.getLuts()[channel-1]);			
+		}else {
+			IJ.run(impNew,"" + color,"");
+		}
 		
 		impNew.setCalibration(imp.getCalibration());
 		
