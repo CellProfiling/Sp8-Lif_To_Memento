@@ -87,7 +87,7 @@ public class Sp8LifToMemento_Main implements PlugIn {
 	String selectedChannelColors [] = new String[] {"ORIGINAL", "ORIGINAL", "ORIGINAL", "ORIGINAL", "ORIGINAL", "ORIGINAL"};
 	boolean changeCColors = false;
 	
-	boolean diagnosisLogging = true;
+	boolean diagnosisLogging = false;
 	
 	String outPath = "E:" + System.getProperty("file.separator") + System.getProperty("file.separator") + "Sp8LifToMemento"
 			+ System.getProperty("file.separator");
