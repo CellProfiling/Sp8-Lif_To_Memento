@@ -131,8 +131,8 @@ public class OpenFilesDialog extends javax.swing.JFrame implements ActionListene
 	public void actionPerformed(ActionEvent ae) {
 		Object eventQuelle = ae.getSource();
 		if (eventQuelle == loadSingleFilesButton) {
-			String OS = System.getProperty("os.name").toUpperCase();			
-			if(OS.contains("MAC")) {
+//			String OS = System.getProperty("os.name").toUpperCase();			
+//			if(OS.contains("MAC")) {
 				java.awt.FileDialog fd = new java.awt.FileDialog(this, "Select files to add to list.");
 				fd.setDirectory(System.getProperty("user.dir", "."));
 				if (dirsaved) {
@@ -148,26 +148,26 @@ public class OpenFilesDialog extends javax.swing.JFrame implements ActionListene
 					saved = files[i];
 					dirsaved = true;
 				}
-			}else {
-				JFileChooser chooser = new JFileChooser();
-				chooser.setPreferredSize(new Dimension(600, 400));
-				chooser.setCurrentDirectory(new File(System.getProperty("user.dir", ".")));
-				if(acceptDirsOnly) {
-					chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);					
-				}
-				if (dirsaved) {
-					chooser.setCurrentDirectory(saved);
-				}
-				chooser.setMultiSelectionEnabled(true);
-				Component frame = null;
-				chooser.showOpenDialog(frame);
-				File[] files = chooser.getSelectedFiles();
-				for (int i = 0; i < files.length; i++) {
-					filesToOpen.add(files[i]);
-					saved = files[i];
-					dirsaved = true;
-				}
-			}
+//			}else {
+//				JFileChooser chooser = new JFileChooser();
+//				chooser.setPreferredSize(new Dimension(600, 400));
+//				chooser.setCurrentDirectory(new File(System.getProperty("user.dir", ".")));
+//				if(acceptDirsOnly) {
+//					chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);					
+//				}
+//				if (dirsaved) {
+//					chooser.setCurrentDirectory(saved);
+//				}
+//				chooser.setMultiSelectionEnabled(true);
+//				Component frame = null;
+//				chooser.showOpenDialog(frame);
+//				File[] files = chooser.getSelectedFiles();
+//				for (int i = 0; i < files.length; i++) {
+//					filesToOpen.add(files[i]);
+//					saved = files[i];
+//					dirsaved = true;
+//				}
+//			}
 			updateDisplay();
 		}
 		if (eventQuelle == loadByPatternButtom) {
