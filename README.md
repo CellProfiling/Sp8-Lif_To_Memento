@@ -1,4 +1,4 @@
-# Sp8-Lif_To_Memento
+# Sp8-Lif To Memento FIJI plugin
 FIJI plugin that reads .lif files from the Sp8 confocal microscope (including 3D stack images) and outputs a file system with pngs for Memento.
 
 ## Copyright
