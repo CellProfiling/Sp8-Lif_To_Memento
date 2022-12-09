@@ -710,7 +710,6 @@ public class Sp8LifToMemento_Main implements PlugIn {
 					//Assign zero to the alpha bits to make it transparent
 					return 0x00FFFFFF & rgb;
 				} else {
-					// nothing to do
 					return rgb;
 				}
 			}
