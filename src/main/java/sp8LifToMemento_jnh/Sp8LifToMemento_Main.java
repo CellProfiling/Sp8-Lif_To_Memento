@@ -615,27 +615,16 @@ public class Sp8LifToMemento_Main implements PlugIn {
 				if(!indivOutFile.exists()) indivOutFile.mkdir();
 			}			
 		}
-				
-//		String channelsActive = "";
+		
 		ImagePlus impNew;
 		String color;
+		BufferedImage bi;
+		Image img;
 		for(int c = 0; c < imp.getNChannels(); c++){
-//			channelsActive = "";
-//			for(int ca = 0; ca < imp.getNChannels(); ca++) {
-//				if(ca == c) {
-//					channelsActive += "1";					
-//				}else {
-//					channelsActive += "0";
-//				}
-//			}
-//			imp.setActiveChannels(channelsActive);
-//			
 			for(int s = 0; s < imp.getNSlices(); s++) {
 				for(int t = 0; t < imp.getNFrames(); t++) {
-//					imp.setPosition(c+1, s+1, t+1);
-					
+					//Determine specific output path
 					indivOutPath = saveFolder + System.getProperty("file.separator");
-					
 					if(s < 10) {
 						indivOutPath += "z0" + s;
 					}else {
@@ -647,13 +636,11 @@ public class Sp8LifToMemento_Main implements PlugIn {
 						}else {
 							indivOutPath += "_t" + t;
 						}
-					}
-					
+					}					
 					indivOutPath += System.getProperty("file.separator") + fileName;
 					if(!fileName.equals("")) {
 						indivOutPath += "_";
-					}
-					
+					}					
 					indivOutPath += "C" + c + ".png";
 					
 					if(changeCColors && c < selectedChannelColors.length){
@@ -661,21 +648,14 @@ public class Sp8LifToMemento_Main implements PlugIn {
 					}else {
 						color = "ORIGINAL";
 					}
+
+					//retrieve image, add transparency, and write it
 					impNew = getIndividualImage(imp, c+1, s+1, t+1, false, color);
-					
-//					impNew.show();
-//					new WaitForUserDialog("toPNG").show();
-//					impNew.hide();
-					
-					BufferedImage bi = impNew.getBufferedImage();
-					
-					Image img = colorToTransparent(bi, Color.BLACK);
-					
+					bi = impNew.getBufferedImage();
+					img = colorToTransparent(bi, Color.BLACK);
 					bi = imageToBuffered(img, bi.getWidth(), bi.getHeight());
+					saveBufferedImageAsPNG(bi, indivOutPath);
 					
-					this.saveBufferedImageAsPNG(bi, indivOutPath);
-					
-//					IJ.saveAs(impNew, "PNG", indivOutPath);
 					impNew.changes = false;
 					impNew.close();
 				}
@@ -683,7 +663,7 @@ public class Sp8LifToMemento_Main implements PlugIn {
 		}
 	}
 	
-	private void saveBufferedImageAsPNG(BufferedImage bi, String path) {
+	private static void saveBufferedImageAsPNG(BufferedImage bi, String path) {
 		try {
 			ImageIO.write(bi, "png", new File(path));
 		} catch (IOException e) {
