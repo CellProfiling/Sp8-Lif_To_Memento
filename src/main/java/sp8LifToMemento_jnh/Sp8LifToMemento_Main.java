@@ -150,9 +150,8 @@ public class Sp8LifToMemento_Main implements PlugIn {
 		gd.setInsets(10,0,0);	gd.addMessage("Naming of output files", SubHeadingFont);
 		gd.setInsets(0,0,0);		gd.addCheckbox("Relabel seriesnames based on table", relabelSeries);		
 		gd.setInsets(0,10,0);	gd.addMessage("When enabling this function you will be requested to select a csv file that contains the columns ", InstructionsFont);
-		gd.setInsets(0,10,0);	gd.addMessage("Antibody,Protein,Plate,Well. This file is used for relabeling the output images to ", InstructionsFont);
-		gd.setInsets(0,10,0);	gd.addMessage("Plate_Antibody_Protein_Well... and placing them in a specific folder structure:", InstructionsFont);
-		gd.setInsets(0,10,0);	gd.addMessage("Antibody/Plate_Well_FieldOfView/zXX/...", InstructionsFont);
+		gd.setInsets(0,10,0);	gd.addMessage("Antibody,Protein,Plate,Well. This file is used for creating the folder structure where output files", InstructionsFont);
+		gd.setInsets(0,10,0);	gd.addMessage("are placed in: Antibody_Protein/Plate_Well_FieldOfView/zXX/[C1.png,C2.png,...]", InstructionsFont);
 		
 		gd.setInsets(10,0,0);	gd.addMessage("Input files", SubHeadingFont);
 		gd.setInsets(0,0,0);		gd.addMessage("A dialog will be shown after this dialog, which allows you to list the .lif files to be processed.", InstructionsFont);
