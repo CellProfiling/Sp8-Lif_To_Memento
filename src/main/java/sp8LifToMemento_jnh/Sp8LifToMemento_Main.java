@@ -248,14 +248,10 @@ public class Sp8LifToMemento_Main implements PlugIn {
     		tableFileName = odTable.getFileName();
     		lookUpTable = getTableFromCSV(tableFileDir + System.getProperty("file.separator") + tableFileName);
     		if(diagnosisLogging) {
-        		IJ.log(lookUpTable[0][0]);
-        		IJ.log(lookUpTable[1][0]);
-        		IJ.log(lookUpTable[2][0]);
-        		IJ.log(lookUpTable[3][0]);
-        		IJ.log(lookUpTable[0][1]);
-        		IJ.log(lookUpTable[1][1]);
-        		IJ.log(lookUpTable[2][1]);
-        		IJ.log(lookUpTable[3][1]);    			
+    			IJ.log("Log of read in csv file:");
+    			for(int i = 0; i < lookUpTable[0].length; i++) {
+            		IJ.log(lookUpTable[0][i] + "	" + lookUpTable[1][i] + "	" + lookUpTable[2][i] + "	" + lookUpTable[3][i]);    	    				
+    			}		
     		}
 		}
 		
@@ -417,7 +413,7 @@ public class Sp8LifToMemento_Main implements PlugIn {
 				}
 		   		
 		   		/**
-				 * TODO Write code for opening the file, adjusting LUT, saving the file
+				 * Processing
 				 * */		
 				{
 					try {
@@ -553,6 +549,7 @@ public class Sp8LifToMemento_Main implements PlugIn {
 			}
 			lines.clear();
 			lines = null;
+			
 			return out;			
 		}catch (IOException e) {
 			IJ.error("Loading table file failed!");
