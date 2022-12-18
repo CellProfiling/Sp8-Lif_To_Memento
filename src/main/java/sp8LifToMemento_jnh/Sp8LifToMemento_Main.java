@@ -292,7 +292,9 @@ public class Sp8LifToMemento_Main implements PlugIn {
 					bfOptions.setVirtual(true);
 					process = new ImportProcess(bfOptions);
 					nOfSeries = getNumberOfSeries(process);
-//					IJ.log("nSeries: " + nOfSeries);
+					if(diagnosisLogging) {
+						IJ.log(dir[i]+name[i] + " - nSeries: " + nOfSeries);						
+					}
 				}				
 				
 				if(nOfSeries > 1) {
