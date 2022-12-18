@@ -1,7 +1,7 @@
 package sp8LifToMemento_jnh;
 
 /** ===============================================================================
-* Sp8Lif_To_Memento ImageJ/FIJI Plugin v0.0.2
+* Sp8Lif_To_Memento ImageJ/FIJI Plugin v0.0.3
 * 
 * This program is free software; you can redistribute it and/or
 * modify it under the terms of the GNU General Public License
@@ -58,7 +58,7 @@ import loci.plugins.in.ImporterOptions;
 public class Sp8LifToMemento_Main implements PlugIn {
 	// Name variables
 	static final String PLUGINNAME = "Sp8Lif_To_Memento";
-	static final String PLUGINVERSION = "0.0.2";
+	static final String PLUGINVERSION = "0.0.3";
 
 	// Fix fonts
 	static final Font SuperHeadingFont = new Font("Sansserif", Font.BOLD, 16);
@@ -267,9 +267,12 @@ public class Sp8LifToMemento_Main implements PlugIn {
 		
 		// Bioformats option - screen for series in lif file
 		//For BioFormats - screen for series and add tasks accordingly
-		ImporterOptions bfOptions;
+		ImporterOptions bfOptions = null;
+		ImportProcess process = null;
+		String previousFile = "";
 		int seriesID [] = new int [tasks];
 		int totSeries [] = new int [tasks];
+		int nOfSeries = -1;
 		Arrays.fill(seriesID, 0);
 		Arrays.fill(totSeries, 1);
 		
@@ -282,12 +285,15 @@ public class Sp8LifToMemento_Main implements PlugIn {
 				continue;
 			}
 			try {
-				bfOptions = new ImporterOptions();
-				bfOptions.setId(""+dir[i]+name[i]+"");
-				bfOptions.setVirtual(true);
-				
-				int nOfSeries = getNumberOfSeries(bfOptions);
-//				IJ.log("nSeries: " + nOfSeries);
+				if(!((dir[i]+name[i]).equals(previousFile))){
+					previousFile = dir[i]+name[i];
+					bfOptions = new ImporterOptions();
+					bfOptions.setId(""+dir[i]+name[i]+"");
+					bfOptions.setVirtual(true);
+					process = new ImportProcess(bfOptions);
+					nOfSeries = getNumberOfSeries(process);
+//					IJ.log("nSeries: " + nOfSeries);
+				}				
 				
 				if(nOfSeries > 1) {
 					String [] nameTemp = new String [name.length+nOfSeries-1], 
@@ -308,7 +314,7 @@ public class Sp8LifToMemento_Main implements PlugIn {
 						nameTemp [i+j] = name [i]; 
 						dirTemp [i+j] = dir [i];
 						seriesTemp [i+j] = j;
-						seriesNameTemp [i+j] = getSeriesName(bfOptions, j);
+						seriesNameTemp [i+j] = getSeriesName(process, j);
 						totSeriesTemp [i+j] = nOfSeries;
 					}
 					for(int j = i+1; j < name.length; j++) {
@@ -501,7 +507,6 @@ public class Sp8LifToMemento_Main implements PlugIn {
 			progress.moveTask(task);
 		}
 	}	
-	
 
 	/**
 	 * get number of series 
@@ -511,13 +516,28 @@ public class Sp8LifToMemento_Main implements PlugIn {
 		if (!process.execute()) return -1;
 		return process.getSeriesCount();
 	}
-	
+
+	/**
+	 * get number of series 
+	 * */
+	private int getNumberOfSeries(ImportProcess process) throws FormatException, IOException{
+		if (!process.execute()) return -1;
+		return process.getSeriesCount();
+	}
 
 	/**
 	 * @return name of the @param series (0 <= series < number of series)
 	 * */
 	private String getSeriesName(ImporterOptions options, int series) throws FormatException, IOException{
 		ImportProcess process = new ImportProcess(options);
+		if (!process.execute()) return "NaN";
+		return process.getSeriesLabel(series);
+	}
+	
+	/**
+	 * @return name of the @param series (0 <= series < number of series)
+	 * */
+	private String getSeriesName(ImportProcess process, int series) throws FormatException, IOException{
 		if (!process.execute()) return "NaN";
 		return process.getSeriesLabel(series);
 	}
