@@ -507,6 +507,7 @@ public class Sp8LifToMemento_Main implements PlugIn {
 				break running;
 			}
 			progress.moveTask(task);
+			System.gc();
 		}
 	}	
 
