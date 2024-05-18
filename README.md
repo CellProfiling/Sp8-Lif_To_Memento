@@ -2,7 +2,7 @@
 FIJI plugin that reads .lif files from the Sp8 confocal microscope (including 3D stack images) and outputs a file system with pngs for Memento.
 
 ## Copyright
-(c) 2022, Jan N. Hansen
+(c) 2022-2024, Jan N. Hansen
 
 Contact: jan.hansen (at) scilifelab.se
 
@@ -74,4 +74,14 @@ Next a dialog pops up asking you to select the table.csv file in the next dialog
 In the next dialog select the csv file you want to provide.
 
 To be continued....
+
+
+### Updating the plugin version
+Download the new version's .jar file from the [release page](https://github.com/CellProfiling/Sp8-Lif_To_Memento/releases). Make sure FIJI is closed - if still open, close it. Next, locate the FIJI software file / folder on your computer and go on below depending on your OS.
+
+#### Windows
+In Windows or Linux, FIJI is a directory called FIJI.app. Enter this directory and navigate to the "plugins" folder and enter it. Find the old version of the Sp8Lif_To_Memento_JNH-X.X.X-SNAPSHOT.jar file and delete it. Then place the new plugin version in the "plugins" folder. Exit the FIJI.app folder. Start FIJI.
+
+#### Mac
+In Mac OS, FIJI is just a software file (FIJI.app). Right click on the FIJI icon (or hold option and do normal click on it), then select "Show Package Content". A folder will open, which contains the contents of the FIJI.app. Navigate to the "plugins" folder folder and enter it. Find the old version of the Sp8Lif_To_Memento_JNH-X.X.X-SNAPSHOT.jar file and delete it. Then place the new plugin version in the "plugins" folder . Exit the FIJI.app folder. Start FIJI.
 
