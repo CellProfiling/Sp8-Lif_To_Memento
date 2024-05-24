@@ -1,7 +1,7 @@
 package sp8LifToMemento_jnh;
 
 /** ===============================================================================
-* Sp8Lif_To_Memento ImageJ/FIJI Plugin v0.0.4
+* Sp8Lif_To_Memento ImageJ/FIJI Plugin v0.0.5
 * 
 * This program is free software; you can redistribute it and/or
 * modify it under the terms of the GNU General Public License
@@ -15,7 +15,7 @@ package sp8LifToMemento_jnh;
 * See the GNU General Public License for more details.
 *  
 * Copyright (C) Jan Niklas Hansen
-* Date: November, 2022 (This Version: July 16, 2023)
+* Date: November, 2022 (This Version: May 24, 2024)
 *   
 * For any questions please feel free to contact me (jan.hansen@scilifelab.se).
 * =============================================================================== */
@@ -58,7 +58,7 @@ import loci.plugins.in.ImporterOptions;
 public class Sp8LifToMemento_Main implements PlugIn {
 	// Name variables
 	static final String PLUGINNAME = "Sp8Lif_To_Memento";
-	static final String PLUGINVERSION = "0.0.4";
+	static final String PLUGINVERSION = "0.0.5";
 
 	// Fix fonts
 	static final Font SuperHeadingFont = new Font("Sansserif", Font.BOLD, 16);
@@ -99,11 +99,13 @@ public class Sp8LifToMemento_Main implements PlugIn {
 	boolean changeCColors = false;
 	
 	boolean diagnosisLogging = false;
+
+	boolean writePNG = false;
 	
-	String outPath = "E:" + System.getProperty("file.separator") + System.getProperty("file.separator") + "Sp8LifToMemento"
+	String outPathPNG = "E:" + System.getProperty("file.separator") + System.getProperty("file.separator") + "Sp8LifToMemento"
 			+ System.getProperty("file.separator");
 
-	boolean writeTif = false;
+	boolean writeTif = true;
 	
 	String outPathTif = "E:" + System.getProperty("file.separator") + System.getProperty("file.separator") + "Sp8LifToMemento"
 			+ System.getProperty("file.separator");
@@ -130,56 +132,68 @@ public class Sp8LifToMemento_Main implements PlugIn {
 		// &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 		// --------------------------REQUEST USER-SETTINGS-----------------------------
 		// &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+		GenericDialog gd;
 		
-		GenericDialog gd = new GenericDialog(PLUGINNAME + " - set parameters");	
-		//show Dialog-----------------------------------------------------------------
-		gd.setInsets(0,0,0);	gd.addMessage(PLUGINNAME + ", Version " + PLUGINVERSION + ", \u00a9 2022-2023 JN Hansen", SuperHeadingFont);	
-		
+		while(true) {
+			gd = new GenericDialog(PLUGINNAME + " - set parameters");	
+			//show Dialog-----------------------------------------------------------------
+			gd.setInsets(0,0,0);	gd.addMessage(PLUGINNAME + ", Version " + PLUGINVERSION + ", \u00a9 2022-2024 JN Hansen", SuperHeadingFont);	
+			gd.addHelp("https://github.com/CellProfiling/Sp8-Lif_To_Memento/");
 
-		gd.setInsets(0,0,0);	gd.addMessage("Notes", SubHeadingFont);
-		
-		gd.setInsets(0,0,0);		gd.addMessage("The plugin processes .lif files from 'TileScans' acquired with the Leica Sp8. TileScans here refers to automated", InstructionsFont);
-		gd.setInsets(0,0,0);		gd.addMessage("acquisition of many images on a multi-well plates, all stored in one .lif file.", InstructionsFont);
-		gd.setInsets(0,0,0);		gd.addMessage("The plugin generates an output directory with PNGs, which can be imported to Memento.", InstructionsFont);	
-		gd.setInsets(10,0,0);	gd.addMessage("This plugin runs only in FIJI (not in a blank ImageJ, where there is not OME BioFormats integration).", InstructionsFont);		
+			gd.setInsets(0,0,0);	gd.addMessage("Notes", SubHeadingFont);
+			
+			gd.setInsets(0,0,0);		gd.addMessage("The plugin processes .lif files from 'TileScans' acquired with the Leica Sp8. TileScans here refers to automated", InstructionsFont);
+			gd.setInsets(0,0,0);		gd.addMessage("acquisition of many images on a multi-well plates, all stored in one .lif file.", InstructionsFont);
+			gd.setInsets(0,0,0);		gd.addMessage("The plugin generates an output directory with PNGs, which can be imported to Memento, or with Tiffs", InstructionsFont);
+			gd.setInsets(0,0,0);		gd.addMessage("for analysis or further processing before importing into memento (e.g., adjustments on the well or column level).", InstructionsFont);	
+			gd.setInsets(10,0,0);	gd.addMessage("This plugin runs only in FIJI (not in a blank ImageJ, where there is not OME BioFormats integration).", InstructionsFont);		
+						
+			gd.setInsets(10,0,0);	gd.addMessage("Processing Settings", SubHeadingFont);		
+			gd.setInsets(0,0,0);		gd.addChoice("Image type", imageType, selectedImageType);
+			
+			gd.setInsets(0,0,0);		gd.addCheckbox("Export PNG files for direct Memento upload", writePNG);
+			gd.setInsets(0,0,0);		gd.addStringField("Filepath for png output folders (if selected)", outPathPNG, 40);
+			gd.setInsets(0,0,0);		gd.addCheckbox("Export tif files for analysis / intensity-scaling", writeTif);
+			gd.setInsets(0,0,0);		gd.addStringField("Filepath for tif output folders (if selected)", outPathTif, 40);
+			
+			gd.setInsets(10,0,0);		gd.addCheckbox("Change colors of the individual channels | number of channels", changeCColors);
+			gd.setInsets(-23,250,0);	gd.addNumericField("", numberOfChannels, 0);
+			gd.setInsets(-2,10,0);	gd.addMessage("When activating this checkbox you will receive a separate dialog to modify channel colors in the next step.", InstructionsFont);
+			
+			gd.setInsets(10,0,0);	gd.addMessage("Naming of output files", SubHeadingFont);
+			gd.setInsets(0,0,0);		gd.addCheckbox("Relabel seriesnames based on table", relabelSeries);		
+			gd.setInsets(0,10,0);	gd.addMessage("When enabling this function you will be requested to select a csv file that contains the columns ", InstructionsFont);
+			gd.setInsets(0,10,0);	gd.addMessage("Antibody,Protein,Plate,Well. This file is used for creating the folder structure where output files", InstructionsFont);
+			gd.setInsets(0,10,0);	gd.addMessage("are placed in: Antibody_Protein/Plate_Well_FieldOfView/zXX/[C1.png,C2.png,...]", InstructionsFont);
+			
+			gd.setInsets(10,0,0);	gd.addMessage("Input files", SubHeadingFont);
+			gd.setInsets(0,0,0);		gd.addMessage("A dialog will be shown after this dialog, which allows you to list the .lif files to be processed.", InstructionsFont);
+			
+			gd.setInsets(10,0,0);	gd.addMessage("Extended modes", SubHeadingFont);
+			gd.setInsets(0,0,0);		gd.addCheckbox("Extended logging for diagnosis of errors", diagnosisLogging);
 					
-		gd.setInsets(10,0,0);	gd.addMessage("Processing Settings", SubHeadingFont);		
-		gd.setInsets(0,0,0);		gd.addChoice("Image type", imageType, selectedImageType);
-		
-		gd.setInsets(0,0,0);		gd.addStringField("Filepath for output folders (Memento)", outPath, 40);
-		gd.setInsets(0,0,0);		gd.addCheckbox("Additionally export tif files for analysis", writeTif);
-		gd.setInsets(0,0,0);		gd.addStringField("Filepath for output folders (Analysis)", outPathTif, 40);
-		
-		gd.setInsets(10,0,0);		gd.addCheckbox("Change colors of the individual channels | number of channels", changeCColors);
-		gd.setInsets(-23,250,0);	gd.addNumericField("", numberOfChannels, 0);
-		gd.setInsets(-2,10,0);	gd.addMessage("When activating this checkbox you will receive a separate dialog to modify channel colors in the next step.", InstructionsFont);
-		
-		gd.setInsets(10,0,0);	gd.addMessage("Naming of output files", SubHeadingFont);
-		gd.setInsets(0,0,0);		gd.addCheckbox("Relabel seriesnames based on table", relabelSeries);		
-		gd.setInsets(0,10,0);	gd.addMessage("When enabling this function you will be requested to select a csv file that contains the columns ", InstructionsFont);
-		gd.setInsets(0,10,0);	gd.addMessage("Antibody,Protein,Plate,Well. This file is used for creating the folder structure where output files", InstructionsFont);
-		gd.setInsets(0,10,0);	gd.addMessage("are placed in: Antibody_Protein/Plate_Well_FieldOfView/zXX/[C1.png,C2.png,...]", InstructionsFont);
-		
-		gd.setInsets(10,0,0);	gd.addMessage("Input files", SubHeadingFont);
-		gd.setInsets(0,0,0);		gd.addMessage("A dialog will be shown after this dialog, which allows you to list the .lif files to be processed.", InstructionsFont);
-		
-		gd.setInsets(10,0,0);	gd.addMessage("Extended modes", SubHeadingFont);
-		gd.setInsets(0,0,0);		gd.addCheckbox("Extended logging for diagnosis of errors", diagnosisLogging);		
-				
-		gd.showDialog();
-		//show Dialog-----------------------------------------------------------------
+			gd.showDialog();
+			//show Dialog-----------------------------------------------------------------
 
-		//read and process variables--------------------------------------------------	
-		selectedImageType = gd.getNextChoice();
-		outPath = gd.getNextString();
-		writeTif = gd.getNextBoolean();
-		outPathTif = gd.getNextString();
-		changeCColors = gd.getNextBoolean();
-		numberOfChannels = (int) gd.getNextNumber();	
-		relabelSeries = gd.getNextBoolean();
-		diagnosisLogging = gd.getNextBoolean();
-		//read and process variables--------------------------------------------------
-		if (gd.wasCanceled()) return;
+			//read and process variables--------------------------------------------------	
+			selectedImageType = gd.getNextChoice();
+			writePNG = gd.getNextBoolean();
+			outPathPNG = gd.getNextString();
+			writeTif = gd.getNextBoolean();
+			outPathTif = gd.getNextString();
+			changeCColors = gd.getNextBoolean();
+			numberOfChannels = (int) gd.getNextNumber();	
+			relabelSeries = gd.getNextBoolean();
+			diagnosisLogging = gd.getNextBoolean();
+			//read and process variables--------------------------------------------------
+			if (gd.wasCanceled()) return;
+			
+			if (!writePNG && !writeTif) {
+				new WaitForUserDialog("You need to select at least one output format (tiff or png).\nPlease modfiy the settings accordingly!").show();
+			}else {
+				break;
+			}
+		}
 		
 		if(changeCColors) {
 			selectedChannelColors = new String[numberOfChannels];
@@ -477,30 +491,28 @@ public class Sp8LifToMemento_Main implements PlugIn {
 						break running;
 					}
 					
-//					imp.show();
-//					new WaitForUserDialog("Before adjusting").show();
-					
-					autoAdjustMinMax(imp);
-					
-//					imp.updateAndRepaintWindow();					
-//					new WaitForUserDialog("After adjusting").show();
+					autoAdjustMinMax(imp,0.1);
 					
 					//Create folder structure and save images
 					//"Antibody/FieldOfView/PlaneZ/[channelC1, channelC2, channelC3...]"
 					
-					File newF;
+					File newFPNG = null;
 					File newFTif = null;
 					String filename;
 					if(namingInfo[0].equals("UNKNOWN")) {
-						newF = new File(outPath + System.getProperty("file.separator") + name[task] + System.getProperty("file.separator") + region + System.getProperty("file.separator"));
+						if(writePNG) {
+							newFPNG = new File(outPathPNG + System.getProperty("file.separator") + name[task] + System.getProperty("file.separator") + region + System.getProperty("file.separator"));
+						}
 						if(writeTif) {
 							newFTif = new File(outPathTif + System.getProperty("file.separator") + name[task] + System.getProperty("file.separator") + region + System.getProperty("file.separator"));
 						}
 						filename = "";
 					}else {
-						newF = new File(outPath + System.getProperty("file.separator") + namingInfo[0] +"_" + namingInfo[1] 
-								+ System.getProperty("file.separator") + namingInfo[2] + "_" + namingInfo[3] + "_"+ region
-								+ System.getProperty("file.separator"));
+						if(writePNG) {
+							newFPNG = new File(outPathPNG + System.getProperty("file.separator") + namingInfo[0] +"_" + namingInfo[1] 
+									+ System.getProperty("file.separator") + namingInfo[2] + "_" + namingInfo[3] + "_"+ region
+									+ System.getProperty("file.separator"));
+						}
 						if(writeTif) {
 							newFTif = new File(outPathTif + System.getProperty("file.separator") + namingInfo[0] +"_" + namingInfo[1] 
 									+ System.getProperty("file.separator") + namingInfo[2] + "_" + namingInfo[3] + "_"+ region
@@ -508,23 +520,26 @@ public class Sp8LifToMemento_Main implements PlugIn {
 						}
 						filename = "";
 					}
-					if(!newF.exists())	newF.mkdirs();
+					if(writePNG && !newFPNG.exists()) {
+						newFPNG.mkdirs();
+					}
 					if(writeTif && !newFTif.exists()) {
 						newFTif.mkdirs();
 					}
 					
-					if(writeTif) {
-						saveIndividualImages(imp, newF.getAbsolutePath() + System.getProperty("file.separator"),
+					if(writeTif && writePNG) {
+						saveIndividualImages(imp, newFPNG.getAbsolutePath() + System.getProperty("file.separator"),
 							newFTif.getAbsolutePath() + System.getProperty("file.separator"), 
 							filename);							
-					}else {
-						saveIndividualImages(imp, newF.getAbsolutePath() + System.getProperty("file.separator"),
-							newF.getAbsolutePath() + System.getProperty("file.separator"), 
+					}else if(!writeTif && writePNG){
+						saveIndividualImages(imp, newFPNG.getAbsolutePath() + System.getProperty("file.separator"),
+							newFPNG.getAbsolutePath() + System.getProperty("file.separator"), 
 							filename);							
+					}else {
+						saveIndividualImages(imp, newFTif.getAbsolutePath() + System.getProperty("file.separator"),
+								newFTif.getAbsolutePath() + System.getProperty("file.separator"), 
+								filename);
 					}
-					
-//					new WaitForUserDialog("After adjusting").show();
-//					imp.hide();
 				}
 
 				imp.changes = false;
@@ -642,12 +657,13 @@ public class Sp8LifToMemento_Main implements PlugIn {
 	/**
 	 * @param channel: 1 <= channel,slice,frame <= # channels,slices,frames
 	 * */
-	private void saveIndividualImages(ImagePlus imp, String saveFolder, String saveFolderTif, String fileName) {		
+	private void saveIndividualImages(ImagePlus imp, String saveFolderPNG, String saveFolderTif, String fileName) {		
 		//Making the folders required
-		String indivOutPath;
+		String indivOutPathPNG;
 		String indivOutPathTif;
 		String indivOutAddPath;
-		File indivOutFile, indivOutFileTif;
+		File indivOutFilePNG, indivOutFileTif;
+		
 		for(int s = 0; s < imp.getNSlices(); s++) {			
 			for(int t = 0; t < imp.getNFrames(); t++) {
 				indivOutAddPath = System.getProperty("file.separator");				
@@ -663,12 +679,16 @@ public class Sp8LifToMemento_Main implements PlugIn {
 						indivOutAddPath += "_t" + t;
 					}
 				}
-				indivOutPath = saveFolder + indivOutAddPath;
-				indivOutPathTif = saveFolderTif + indivOutAddPath;
-				indivOutFile = new File(indivOutPath);
-				indivOutFileTif = new File(indivOutPathTif);
-				if(!indivOutFile.exists()) indivOutFile.mkdir();
-				if(!indivOutFileTif.exists()) indivOutFileTif.mkdir();
+				if(writePNG) {
+					indivOutPathPNG = saveFolderPNG + indivOutAddPath;
+					indivOutFilePNG = new File(indivOutPathPNG);
+					if(!indivOutFilePNG.exists()) indivOutFilePNG.mkdir();
+				}
+				if(writeTif) {
+					indivOutPathTif = saveFolderTif + indivOutAddPath;
+					indivOutFileTif = new File(indivOutPathTif);
+					if(!indivOutFileTif.exists()) indivOutFileTif.mkdir();					
+				}
 			}			
 		}
 
@@ -705,21 +725,24 @@ public class Sp8LifToMemento_Main implements PlugIn {
 					}else {
 						color = "ORIGINAL";
 					}
-					
-					indivOutPath = saveFolder + indivOutAddPath;
-					indivOutPathTif = saveFolderTif + indivOutAddPath;
-
-					//retrieve image, add transparency, and write it
+										
+					//retrieve image
 					impNew = getIndividualImage(imp, c+1, s+1, t+1, false, color);
 					if(writeTif) {
+						indivOutPathTif = saveFolderTif + indivOutAddPath;
+						
+						//save tif image
 						IJ.saveAs(impNew, "Tif", indivOutPathTif);
 					}
-					
-					bi = impNew.getBufferedImage();
-					img = colorToTransparent(bi, Color.BLACK);
-					bi = imageToBuffered(img, bi.getWidth(), bi.getHeight());
-					saveBufferedImageAsPNG(bi, indivOutPath);
-					
+					if(writePNG) {
+						indivOutPathPNG = saveFolderPNG + indivOutAddPath;
+						
+						//add transparency, and write image
+						bi = impNew.getBufferedImage();
+						img = colorToTransparent(bi, Color.BLACK);
+						bi = imageToBuffered(img, bi.getWidth(), bi.getHeight());
+						saveBufferedImageAsPNG(bi, indivOutPathPNG);
+					}					
 					impNew.changes = false;
 					impNew.close();
 				}
@@ -800,27 +823,24 @@ public class Sp8LifToMemento_Main implements PlugIn {
 	}
 	
 	/**
-	 * Finds the maximum intensity value in each channel and sets the display to 0 to maximum.
-	 * If the maximum is below 255 it sets the maximum to 255. 
+	 * Enhances the contrast by oversaturating the top @param "percenOversaturated" percent.
+	 * 
 	 * */
-	private void autoAdjustMinMax(ImagePlus imp) {
+	private void autoAdjustMinMax(ImagePlus imp, double percentOversaturated) {
 		double max;
-		int index = 0;
-		double pxVal;
 		for(int c = 0; c < imp.getNChannels(); c++){
 			max = Double.NEGATIVE_INFINITY;
+			imp.setC(c+1);
 			for(int t = 0; t < imp.getNFrames(); t++) {
+				imp.setT(t+1);
 				for(int s = 0; s < imp.getNSlices(); s++) {
-					for(int x = 0; x < imp.getWidth(); x++){
-						for(int y = 0; y < imp.getHeight(); y++){
-							index = imp.getStackIndex(c+1, s+1, t+1)-1;
-							pxVal = imp.getStack().getVoxel(x, y, index);
-							if(pxVal > max) max = pxVal;
-						}
+					imp.setZ(s+1);
+					IJ.run(imp, "Enhance Contrast...", "saturated=" + percentOversaturated);
+					if(imp.getDisplayRangeMax()>max) {
+						max = imp.getDisplayRangeMax();
 					}							
 				}
 			}
-			imp.setC(c+1);
 			if(max < 255.0)	max = 255.0;
 			imp.setDisplayRange(0, max);
 		}
