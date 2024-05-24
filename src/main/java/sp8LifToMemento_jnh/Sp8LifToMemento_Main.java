@@ -203,7 +203,7 @@ public class Sp8LifToMemento_Main implements PlugIn {
 			
 			gd = new GenericDialog(PLUGINNAME + " - set parameters");	
 			//show Dialog-----------------------------------------------------------------
-			gd.setInsets(0,0,0);	gd.addMessage(PLUGINNAME + ", Version " + PLUGINVERSION + ", \u00a9 2022 JN Hansen", SuperHeadingFont);	
+			gd.setInsets(0,0,0);	gd.addMessage(PLUGINNAME + ", Version " + PLUGINVERSION + ", \u00a9 2022-2024 JN Hansen", SuperHeadingFont);	
 			
 			gd.setInsets(15,0,0);	gd.addMessage("Modify channel colors for output", SubHeadingFont);
 			for(int c = 0; c < numberOfChannels; c++) {
