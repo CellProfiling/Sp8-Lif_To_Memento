@@ -85,6 +85,10 @@ Now the plugin will automatically run and populate the output folders. Note that
 </p>
 
 Ones all files are preexplored and the plugin runs you are getting informed about the status by another window showing also a progress bar and the series that have been already processes / the series that still need to be processed.
+<p align="center">
+   <img src="https://github.com/CellProfiling/Sp8-Lif_To_Memento/assets/27991883/80cf4142-e102-447b-8ad5-28cab8a83013" width=450>
+</p>
+
 
 The progress dialog will let you know when it is done in a message written on the progress bar (on Windows the progress bar will turn green when the plugin has finished processing).
 
