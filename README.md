@@ -1,5 +1,5 @@
 # Sp8-Lif To Memento FIJI plugin
-FIJI plugin that reads .lif files from the Sp8 confocal microscope (including 3D stack images) and outputs a file system with pngs for Memento.
+FIJI plugin that reads .lif files from the Sp8 confocal microscope (including 3D stack images) and outputs a file system with tiffs and a file system with png files. The png files can be directly used for setting up a memento project. Note however that in this plugin the image intensity scaling is done on the image level. If you prefer to scale intensities for all images of a well jointly, making images within a well more comparable, you should rather export tiffs and then convert them to JPGs or PNGs by [another tool](https://github.com/CellProfiling/TifCs_To_HPA-PNG-JPEG) before uploading these files to memento.
 
 ## Copyright
 (c) 2022-2024, Jan N. Hansen
@@ -45,10 +45,12 @@ Launch the plugin via
 
 A settings dialog is displayed that also guides you through the settings
 <p align="center">
-   <img src="https://user-images.githubusercontent.com/27991883/206779381-b950312a-1854-47c9-a1da-a64307f93147.png" width=450>
+   <img src="https://github.com/CellProfiling/Sp8-Lif_To_Memento/assets/27991883/42b4cb41-a9ef-4991-b46f-8f900e91c61a" width=450>
 </p>
 
 Notes on the settings:
+- You can decide whether you want to export PNGs, TIFs, or both types of file formats. The exported background-transparent PNG images (![png-setting](https://github.com/CellProfiling/Sp8-Lif_To_Memento/assets/27991883/44a15941-2e78-42ed-b6bb-835c2ad7d53e)) can be directly imported into Memento, where these can be installed to allow you to toggle on / off channels. The display ranges (maximum intensity displayed as maximum color brightness) of the images will be based on the intensity in the images. The plugin will set the LUT of the image in a way that the display range is from 0 to the 99.9% percentile of the intensities in the channel, meaning that the conversion to PNG will be created in a way that 0.1% of the pixels in the image will be oversaturated. Note that the percentile calculation and conversion is done on the image level, so different images from the same well may look different, especially if you have large variance in intensity among the regions / cells. Thus, and for improved speed in memento, it is more recommended to export to Tif files (![tif-export](https://github.com/CellProfiling/Sp8-Lif_To_Memento/assets/27991883/749ddbe9-c05a-4d42-8f81-043150d59eb7)) (which you can also use for image analysis) and then use another tool to convert the Tiffs to JPEGs allowing intensity adjustments on the level of a well or column (see [TifCs_To_HPA-PNG-JPEG](https://github.com/CellProfiling/TifCs_To_HPA-PNG-JPEG)).
+
 - If you select ![image](https://user-images.githubusercontent.com/27991883/206779545-900d241b-4b13-47bf-a060-26bbcbf0d8f8.png) make sure to also set the number of channels that are contained in your image. When this option is selected after the current settings dialog is confirmed by clicking OK, another dialog will pop up that allows you to modify the colors in which the individual channels are displayed in the output files. The color "ORIGINAL" should be selected if you want to keep the color profile assigned in the .lif file.
 
 <p align="center">
@@ -67,14 +69,32 @@ When confirming the settings dialog (and eventually also the channel-color-setti
    <img src="https://user-images.githubusercontent.com/27991883/206780747-f8f488a1-7ee2-4fc3-9171-a66901347ea5.png" width=300>
 </p>
 
-Next a dialog pops up asking you to select the table.csv file in the next dialog. Confirm this dialog.
+Next a dialog pops up asking you to select the csv file in the next dialog. Confirm this dialog.
+<p align="center">
+   <img src="https://user-images.githubusercontent.com/27991883/206784843-e185295d-c010-41c0-a01d-7ab65c900418.png" width=500>
+</p>
 
-![image](https://user-images.githubusercontent.com/27991883/206784843-e185295d-c010-41c0-a01d-7ab65c900418.png)
+In the next dialog select the csv file you want to provide and press "Open".
+<p align="center">
+   <img src="https://github.com/CellProfiling/Sp8-Lif_To_Memento/assets/27991883/1e3dd30a-7185-427f-ad5f-1690a7aa3db7" width=450>
+</p>
 
-In the next dialog select the csv file you want to provide.
+Now the plugin will automatically run and populate the output folders. Note that there can be a significant delay until you see a progress dialog informing you about progress. This delay appears when you load a big lif file (of several to 10s or 100s of GB). In that case the plugin is opening this large file during the delay, which is taking a lot of time for large files. During this delay, a console may pop up and show a lot of warnings. These warnings can just be ignored. You can minimize the console or close it. The warnings come from problems during metadata import from the .lif into the ome-xml scheme.
+<p align="center">
+   <img src="https://github.com/CellProfiling/Sp8-Lif_To_Memento/assets/27991883/57abc7da-3e2f-488b-9d54-1cf5e5c6b5e5" width=450>
+</p>
 
-To be continued....
+Ones all files are preexplored and the plugin runs you are getting informed about the status by another window showing also a progress bar and the series that have been already processes / the series that still need to be processed.
 
+The progress dialog will let you know when it is done in a message written on the progress bar (on Windows the progress bar will turn green when the plugin has finished processing).
+
+#### Common errors
+If the processing failed you will see a message in the progress bar alerting you about errors and you can see information about the errors in the "Notifications" list. On Windows, the progress bar also turns red when errors occur.
+<p align="center">
+   <img src="https://github.com/CellProfiling/Sp8-Lif_To_Memento/assets/27991883/148cfb16-c861-4bd3-b375-54f348004f80" width=650>
+</p>
+
+If you cannot conclude on the error reason based on the messages, mark the messages in the log window, copy them to the clipboard (Cmd+C on mac, Ctrl+C in windows) and paste them into an email or document and send it to the developer and ask for help (jan.hansen at scilifelab.se).
 
 ### Updating the plugin version
 Download the new version's .jar file from the [release page](https://github.com/CellProfiling/Sp8-Lif_To_Memento/releases). Make sure FIJI is closed - if still open, close it. Next, locate the FIJI software file / folder on your computer and go on below depending on your OS.
