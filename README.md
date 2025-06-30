@@ -45,7 +45,7 @@ Launch the plugin via
 
 A settings dialog is displayed that also guides you through the settings
 <p align="center">
-   <img src="https://github.com/CellProfiling/Sp8-Lif_To_Memento/assets/27991883/42b4cb41-a9ef-4991-b46f-8f900e91c61a" width=450>
+   <img src="https://github.com/user-attachments/assets/7d67b149-e8c5-4184-9a27-ac677b24766b" width=450>
 </p>
 
 Notes on the settings:
