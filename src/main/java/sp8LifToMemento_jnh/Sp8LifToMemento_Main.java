@@ -1,7 +1,7 @@
 package sp8LifToMemento_jnh;
 
 /** ===============================================================================
-* Sp8Lif_To_Memento ImageJ/FIJI Plugin v0.0.6
+* Sp8Lif_To_Memento ImageJ/FIJI Plugin v0.0.7
 * 
 * This program is free software; you can redistribute it and/or
 * modify it under the terms of the GNU General Public License
@@ -58,7 +58,7 @@ import loci.plugins.in.ImporterOptions;
 public class Sp8LifToMemento_Main implements PlugIn {
 	// Name variables
 	static final String PLUGINNAME = "Sp8Lif_To_Memento";
-	static final String PLUGINVERSION = "0.0.6";
+	static final String PLUGINVERSION = "0.0.7";
 
 	// Fix fonts
 	static final Font SuperHeadingFont = new Font("Sansserif", Font.BOLD, 16);
@@ -110,6 +110,12 @@ public class Sp8LifToMemento_Main implements PlugIn {
 	String outPathTif = "E:" + System.getProperty("file.separator") + System.getProperty("file.separator") + "Sp8LifToMemento"
 			+ System.getProperty("file.separator");
 	
+
+	boolean writeTifStacks = true;
+	
+	String outPathTifStacks = "E:" + System.getProperty("file.separator") + System.getProperty("file.separator") + "Sp8LifToMemento_Stacks"
+			+ System.getProperty("file.separator");
+	
 	// -----------------define params for Dialog-----------------
 
 	@Override
@@ -149,12 +155,15 @@ public class Sp8LifToMemento_Main implements PlugIn {
 			gd.setInsets(10,0,0);	gd.addMessage("This plugin runs only in FIJI (not in a blank ImageJ, where there is not OME BioFormats integration).", InstructionsFont);		
 						
 			gd.setInsets(10,0,0);	gd.addMessage("Processing Settings", SubHeadingFont);		
-			gd.setInsets(0,0,0);		gd.addChoice("Image type", imageType, selectedImageType);
+			gd.setInsets(0,0,0);		gd.addChoice("Image input type", imageType, selectedImageType);
 			
 			gd.setInsets(0,0,0);		gd.addCheckbox("Export PNG files for direct Memento upload", writePNG);
-			gd.setInsets(0,0,0);		gd.addStringField("Filepath for png output folders (if selected)", outPathPNG, 40);
-			gd.setInsets(0,0,0);		gd.addCheckbox("Export tif files for analysis / intensity-scaling", writeTif);
-			gd.setInsets(0,0,0);		gd.addStringField("Filepath for tif output folders (if selected)", outPathTif, 40);
+			gd.setInsets(5,0,0);		gd.addStringField("Filepath for png output folders (if selected)", outPathPNG, 40);
+			gd.setInsets(0,0,0);		gd.addCheckbox("Export single-channel tif files for analysis / intensity-scaling", writeTif);
+			gd.setInsets(0,0,0);		gd.addStringField("Filepath for single-channel tif output folders (if selected)", outPathTif, 40);
+			gd.setInsets(5,0,0);		gd.addCheckbox("Export tif hyperstacks for analysis / intensity-scaling", writeTifStacks);
+			gd.setInsets(0,0,0);		gd.addStringField("Filepath for tif hyperstacks output folders (if selected)", outPathTifStacks, 40);
+			
 			
 			gd.setInsets(10,0,0);		gd.addCheckbox("Change colors of the individual channels | number of channels", changeCColors);
 			gd.setInsets(-23,250,0);	gd.addNumericField("", numberOfChannels, 0);
@@ -181,6 +190,8 @@ public class Sp8LifToMemento_Main implements PlugIn {
 			outPathPNG = gd.getNextString();
 			writeTif = gd.getNextBoolean();
 			outPathTif = gd.getNextString();
+			writeTifStacks = gd.getNextBoolean();
+			outPathTifStacks = gd.getNextString();
 			changeCColors = gd.getNextBoolean();
 			numberOfChannels = (int) gd.getNextNumber();	
 			relabelSeries = gd.getNextBoolean();
@@ -188,7 +199,7 @@ public class Sp8LifToMemento_Main implements PlugIn {
 			//read and process variables--------------------------------------------------
 			if (gd.wasCanceled()) return;
 			
-			if (!writePNG && !writeTif) {
+			if (!writePNG && !writeTif && !writeTifStacks) {
 				new WaitForUserDialog("You need to select at least one output format (tiff or png).\nPlease modfiy the settings accordingly!").show();
 			}else {
 				break;
@@ -539,6 +550,26 @@ public class Sp8LifToMemento_Main implements PlugIn {
 						saveIndividualImages(imp, newFTif.getAbsolutePath() + System.getProperty("file.separator"),
 								newFTif.getAbsolutePath() + System.getProperty("file.separator"), 
 								filename);
+					}
+					
+					if(writeTifStacks) {
+						if(namingInfo[0].equals("UNKNOWN")) {
+							if(writeTifStacks) {
+								newFTif = new File(outPathTifStacks + System.getProperty("file.separator") + name[task] + System.getProperty("file.separator") + region + System.getProperty("file.separator"));
+							}
+							filename = "";
+						}else {							
+							if(writeTifStacks) {
+								newFTif = new File(outPathTifStacks + System.getProperty("file.separator") + namingInfo[0] +"_" + namingInfo[1] 
+										+ System.getProperty("file.separator") + namingInfo[2] + "_" + namingInfo[3] + System.getProperty("file.separator"));
+							}
+							filename = "";
+						}
+						if(writeTif && !newFTif.exists()) {
+							newFTif.mkdirs();
+						}
+						//save tif image
+						IJ.saveAs(imp, "Tif", newFTif.getAbsolutePath() + System.getProperty("file.separator") + "R" + region + ".tif");
 					}
 				}
 
