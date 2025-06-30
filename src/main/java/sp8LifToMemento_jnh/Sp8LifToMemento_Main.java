@@ -1,7 +1,7 @@
 package sp8LifToMemento_jnh;
 
 /** ===============================================================================
-* Sp8Lif_To_Memento ImageJ/FIJI Plugin v0.0.5
+* Sp8Lif_To_Memento ImageJ/FIJI Plugin v0.0.6
 * 
 * This program is free software; you can redistribute it and/or
 * modify it under the terms of the GNU General Public License
@@ -15,7 +15,7 @@ package sp8LifToMemento_jnh;
 * See the GNU General Public License for more details.
 *  
 * Copyright (C) Jan Niklas Hansen
-* Date: November, 2022 (This Version: May 24, 2024)
+* Date: November, 2022 (This Version: June 30, 2025)
 *   
 * For any questions please feel free to contact me (jan.hansen@scilifelab.se).
 * =============================================================================== */
@@ -58,7 +58,7 @@ import loci.plugins.in.ImporterOptions;
 public class Sp8LifToMemento_Main implements PlugIn {
 	// Name variables
 	static final String PLUGINNAME = "Sp8Lif_To_Memento";
-	static final String PLUGINVERSION = "0.0.5";
+	static final String PLUGINVERSION = "0.0.6";
 
 	// Fix fonts
 	static final Font SuperHeadingFont = new Font("Sansserif", Font.BOLD, 16);
@@ -637,8 +637,16 @@ public class Sp8LifToMemento_Main implements PlugIn {
 	
 	private static String [] receiveWellInformationFromTable(String seriesName, String [][] table) {
 		String wellID;
+		// Fourth column is well information
 		for(int i = 0; i < table[3].length; i++) {
+			//Example seriesName from a .lif tilescan on Sp8: "Series_10: TileScan 1/H/5/R4: 2048 x 2048; 60 planes (5C x 12Z)"
 			wellID = "/" + table[3][i].substring(0,1) + "/" + table[3][i].substring(1) + "/";
+			if(seriesName.contains(wellID)) {
+				return new String[] {table[0][i],table[1][i],table[2][i],table[3][i]};
+			}
+			
+			//Example seriesName from a .lif tilescan on Stellaris 8: "Series_6: TileScan 2/B3 Position3: 2048 x 2048; 44 planes (4C x 11Z)"
+			wellID = "/" + table[3][i] + " ";
 			if(seriesName.contains(wellID)) {
 				return new String[] {table[0][i],table[1][i],table[2][i],table[3][i]};
 			}
@@ -647,9 +655,14 @@ public class Sp8LifToMemento_Main implements PlugIn {
 	}
 	
 	private static String getRegionIDFromSeriesName(String seriesName) {
-		//Example seriesName from a .lif tilescan: "Series_10: TileScan 1/H/5/R4: 2048 x 2048; 60 planes (5C x 12Z)"
+		//Example seriesName from a .lif tilescan on Sp8: "Series_10: TileScan 1/H/5/R4: 2048 x 2048; 60 planes (5C x 12Z)"
 		if(seriesName.contains("/R") && seriesName.contains(": ") && seriesName.contains("; ") && seriesName.contains("(")) {			
 			return seriesName.substring(seriesName.lastIndexOf("/R")+1,seriesName.lastIndexOf(": "));
+		}
+		
+		//Example seriesName from a .lif tilescan on Stellaris 8: "Series_6: TileScan 2/B3 Position3: 2048 x 2048; 44 planes (4C x 11Z)"
+		if(seriesName.contains(" Position") && seriesName.contains(": ") && seriesName.contains("; ") && seriesName.contains("(")) {			
+			return seriesName.substring(seriesName.lastIndexOf(" Position")+1,seriesName.lastIndexOf(": "));
 		}
 		return null;
 	}
@@ -810,7 +823,7 @@ public class Sp8LifToMemento_Main implements PlugIn {
 		impNew.setDisplayRange(imp.getDisplayRangeMin(),imp.getDisplayRangeMax());
 		
 		if(color.equals("ORIGINAL")) {
-			impNew.setLut(imp.getLuts()[channel-1]);			
+			impNew.setLut(imp.getLuts()[channel-1]);
 		}else {
 			IJ.run(impNew,"" + color,"");
 		}
