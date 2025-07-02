@@ -1,7 +1,7 @@
 package sp8LifToMemento_jnh;
 
 /** ===============================================================================
-* Sp8Lif_To_Memento ImageJ/FIJI Plugin v0.0.7
+* Sp8Lif_To_Memento ImageJ/FIJI Plugin v0.0.8
 * 
 * This program is free software; you can redistribute it and/or
 * modify it under the terms of the GNU General Public License
@@ -15,7 +15,7 @@ package sp8LifToMemento_jnh;
 * See the GNU General Public License for more details.
 *  
 * Copyright (C) Jan Niklas Hansen
-* Date: November, 2022 (This Version: June 30, 2025)
+* Date: November, 2022 (This Version: July 2, 2025)
 *   
 * For any questions please feel free to contact me (jan.hansen@scilifelab.se).
 * =============================================================================== */
@@ -58,7 +58,7 @@ import loci.plugins.in.ImporterOptions;
 public class Sp8LifToMemento_Main implements PlugIn {
 	// Name variables
 	static final String PLUGINNAME = "Sp8Lif_To_Memento";
-	static final String PLUGINVERSION = "0.0.7";
+	static final String PLUGINVERSION = "0.0.8";
 
 	// Fix fonts
 	static final Font SuperHeadingFont = new Font("Sansserif", Font.BOLD, 16);
@@ -546,7 +546,7 @@ public class Sp8LifToMemento_Main implements PlugIn {
 						saveIndividualImages(imp, newFPNG.getAbsolutePath() + System.getProperty("file.separator"),
 							newFPNG.getAbsolutePath() + System.getProperty("file.separator"), 
 							filename);							
-					}else {
+					}else if(writeTif && !writePNG){
 						saveIndividualImages(imp, newFTif.getAbsolutePath() + System.getProperty("file.separator"),
 								newFTif.getAbsolutePath() + System.getProperty("file.separator"), 
 								filename);
@@ -554,18 +554,13 @@ public class Sp8LifToMemento_Main implements PlugIn {
 					
 					if(writeTifStacks) {
 						if(namingInfo[0].equals("UNKNOWN")) {
-							if(writeTifStacks) {
-								newFTif = new File(outPathTifStacks + System.getProperty("file.separator") + name[task] + System.getProperty("file.separator") + region + System.getProperty("file.separator"));
-							}
-							filename = "";
+							newFTif = new File(outPathTifStacks + System.getProperty("file.separator") + name[task] + System.getProperty("file.separator") + region + System.getProperty("file.separator"));
 						}else {							
-							if(writeTifStacks) {
-								newFTif = new File(outPathTifStacks + System.getProperty("file.separator") + namingInfo[0] +"_" + namingInfo[1] 
-										+ System.getProperty("file.separator") + namingInfo[2] + "_" + namingInfo[3] + System.getProperty("file.separator"));
-							}
-							filename = "";
+							newFTif = new File(outPathTifStacks + System.getProperty("file.separator") + namingInfo[0] +"_" + namingInfo[1] 
+									+ System.getProperty("file.separator") + namingInfo[2] + "_" + namingInfo[3] + System.getProperty("file.separator"));
 						}
-						if(writeTif && !newFTif.exists()) {
+						filename = "";
+						if(!newFTif.exists()) {
 							newFTif.mkdirs();
 						}
 						//save tif image
