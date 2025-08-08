@@ -1,7 +1,7 @@
 package sp8LifToMemento_jnh;
 
 /** ===============================================================================
-* Sp8Lif_To_Memento ImageJ/FIJI Plugin v0.0.8
+* Sp8Lif_To_Memento ImageJ/FIJI Plugin v0.0.9
 * 
 * This program is free software; you can redistribute it and/or
 * modify it under the terms of the GNU General Public License
@@ -15,7 +15,7 @@ package sp8LifToMemento_jnh;
 * See the GNU General Public License for more details.
 *  
 * Copyright (C) Jan Niklas Hansen
-* Date: November, 2022 (This Version: July 2, 2025)
+* Date: November, 2022 (This Version: August 8, 2025)
 *   
 * For any questions please feel free to contact me (jan.hansen@scilifelab.se).
 * =============================================================================== */
@@ -58,7 +58,7 @@ import loci.plugins.in.ImporterOptions;
 public class Sp8LifToMemento_Main implements PlugIn {
 	// Name variables
 	static final String PLUGINNAME = "Sp8Lif_To_Memento";
-	static final String PLUGINVERSION = "0.0.8";
+	static final String PLUGINVERSION = "0.0.9";
 
 	// Fix fonts
 	static final Font SuperHeadingFont = new Font("Sansserif", Font.BOLD, 16);
@@ -103,15 +103,20 @@ public class Sp8LifToMemento_Main implements PlugIn {
 	boolean writePNG = false;
 	
 	String outPathPNG = "E:" + System.getProperty("file.separator") + System.getProperty("file.separator") + "Sp8LifToMemento"
-			+ System.getProperty("file.separator");
+			+ System.getProperty("file.separator") + "PNG" + System.getProperty("file.separator");
+
+	boolean writeJPG = false;
+	
+	String outPathJPG = "E:" + System.getProperty("file.separator") + System.getProperty("file.separator") + "Sp8LifToMemento"
+			+ System.getProperty("file.separator") + "JPG" + System.getProperty("file.separator");
 
 	boolean writeTif = true;
 	
 	String outPathTif = "E:" + System.getProperty("file.separator") + System.getProperty("file.separator") + "Sp8LifToMemento"
-			+ System.getProperty("file.separator");
+			+ System.getProperty("file.separator") + "TIF" + System.getProperty("file.separator");
 	
 
-	boolean writeTifStacks = true;
+	boolean writeTifStacks = false;
 	
 	String outPathTifStacks = "E:" + System.getProperty("file.separator") + System.getProperty("file.separator") + "Sp8LifToMemento_Stacks"
 			+ System.getProperty("file.separator");
@@ -149,17 +154,22 @@ public class Sp8LifToMemento_Main implements PlugIn {
 			gd.setInsets(0,0,0);	gd.addMessage("Notes", SubHeadingFont);
 			
 			gd.setInsets(0,0,0);		gd.addMessage("The plugin processes .lif files from 'TileScans' acquired with the Leica Sp8. TileScans here refers to automated", InstructionsFont);
-			gd.setInsets(0,0,0);		gd.addMessage("acquisition of many images on a multi-well plates, all stored in one .lif file.", InstructionsFont);
-			gd.setInsets(0,0,0);		gd.addMessage("The plugin generates an output directory with PNGs, which can be imported to Memento, or with Tiffs", InstructionsFont);
-			gd.setInsets(0,0,0);		gd.addMessage("for analysis or further processing before importing into memento (e.g., adjustments on the well or column level).", InstructionsFont);	
+			gd.setInsets(0,0,0);		gd.addMessage("   acquisition of many images on a multi-well plates, all stored in one .lif file.", InstructionsFont);
+			gd.setInsets(0,0,0);		gd.addMessage("The plugin generates an output directory with PNGs or JPGs, either of which can be imported to Memento, or with Tiffs", InstructionsFont);
+			gd.setInsets(0,0,0);		gd.addMessage("   for analysis or further processing before importing into memento (e.g., adjustments on the well or column level).", InstructionsFont);		
+			gd.setInsets(0,0,0);	gd.addMessage("For JPG/PNG output, this plugin will adjust each individual image stack's intensity scale individually. For well", InstructionsFont);		
+			gd.setInsets(0,0,0);	gd.addMessage("   column, or plate level adjustments, please export as Tif and use https://github.com/CellProfiling/TifCs_To_HPA-PNG-JPEG/", InstructionsFont);	
+			gd.setInsets(0,0,0);	gd.addMessage("   to create JPGs or PNGs.", InstructionsFont);		
 			gd.setInsets(10,0,0);	gd.addMessage("This plugin runs only in FIJI (not in a blank ImageJ, where there is not OME BioFormats integration).", InstructionsFont);		
 						
 			gd.setInsets(10,0,0);	gd.addMessage("Processing Settings", SubHeadingFont);		
 			gd.setInsets(0,0,0);		gd.addChoice("Image input type", imageType, selectedImageType);
-			
-			gd.setInsets(0,0,0);		gd.addCheckbox("Export PNG files for direct Memento upload", writePNG);
-			gd.setInsets(5,0,0);		gd.addStringField("Filepath for png output folders (if selected)", outPathPNG, 40);
-			gd.setInsets(0,0,0);		gd.addCheckbox("Export single-channel tif files for analysis / intensity-scaling", writeTif);
+
+			gd.setInsets(5,0,0);		gd.addCheckbox("Export PNG files for direct Memento upload", writePNG);
+			gd.setInsets(0,0,0);		gd.addStringField("Filepath for PNG output folders (if selected)", outPathPNG, 40);
+			gd.setInsets(5,0,0);		gd.addCheckbox("Export JPG files for direct Memento upload", writeJPG);
+			gd.setInsets(0,0,0);		gd.addStringField("Filepath for JPG output folders (if selected)", outPathJPG, 40);
+			gd.setInsets(5,0,0);		gd.addCheckbox("Export single-channel tif files for analysis / intensity-scaling", writeTif);
 			gd.setInsets(0,0,0);		gd.addStringField("Filepath for single-channel tif output folders (if selected)", outPathTif, 40);
 			gd.setInsets(5,0,0);		gd.addCheckbox("Export tif hyperstacks for analysis / intensity-scaling", writeTifStacks);
 			gd.setInsets(0,0,0);		gd.addStringField("Filepath for tif hyperstacks output folders (if selected)", outPathTifStacks, 40);
@@ -188,6 +198,8 @@ public class Sp8LifToMemento_Main implements PlugIn {
 			selectedImageType = gd.getNextChoice();
 			writePNG = gd.getNextBoolean();
 			outPathPNG = gd.getNextString();
+			writeJPG = gd.getNextBoolean();
+			outPathJPG = gd.getNextString();
 			writeTif = gd.getNextBoolean();
 			outPathTif = gd.getNextString();
 			writeTifStacks = gd.getNextBoolean();
@@ -199,8 +211,8 @@ public class Sp8LifToMemento_Main implements PlugIn {
 			//read and process variables--------------------------------------------------
 			if (gd.wasCanceled()) return;
 			
-			if (!writePNG && !writeTif && !writeTifStacks) {
-				new WaitForUserDialog("You need to select at least one output format (tiff or png).\nPlease modfiy the settings accordingly!").show();
+			if (!writePNG && !writeJPG && !writeTif && !writeTifStacks) {
+				new WaitForUserDialog("You need to select at least one output format (tiff or png or jpg).\nPlease modfiy the settings accordingly!").show();
 			}else {
 				break;
 			}
@@ -508,49 +520,64 @@ public class Sp8LifToMemento_Main implements PlugIn {
 					//"Antibody/FieldOfView/PlaneZ/[channelC1, channelC2, channelC3...]"
 					
 					File newFPNG = null;
+					File newFJPG = null;
 					File newFTif = null;
 					String filename;
 					if(namingInfo[0].equals("UNKNOWN")) {
-						if(writePNG) {
+//						if(writePNG) {
 							newFPNG = new File(outPathPNG + System.getProperty("file.separator") + name[task] + System.getProperty("file.separator") + region + System.getProperty("file.separator"));
-						}
-						if(writeTif) {
+//						}
+//						if(writeJPG) {
+							newFJPG = new File(outPathJPG + System.getProperty("file.separator") + name[task] + System.getProperty("file.separator") + region + System.getProperty("file.separator"));
+//						}
+//						if(writeTif) {
 							newFTif = new File(outPathTif + System.getProperty("file.separator") + name[task] + System.getProperty("file.separator") + region + System.getProperty("file.separator"));
-						}
+//						}
 						filename = "";
 					}else {
-						if(writePNG) {
+//						if(writePNG) {
 							newFPNG = new File(outPathPNG + System.getProperty("file.separator") + namingInfo[0] +"_" + namingInfo[1] 
 									+ System.getProperty("file.separator") + namingInfo[2] + "_" + namingInfo[3] + "_"+ region
 									+ System.getProperty("file.separator"));
-						}
-						if(writeTif) {
+//						}
+//						if(writeJPG) {
+							newFJPG = new File(outPathJPG + System.getProperty("file.separator") + namingInfo[0] +"_" + namingInfo[1] 
+									+ System.getProperty("file.separator") + namingInfo[2] + "_" + namingInfo[3] + "_"+ region
+									+ System.getProperty("file.separator"));
+//						}
+//						if(writeTif) {
 							newFTif = new File(outPathTif + System.getProperty("file.separator") + namingInfo[0] +"_" + namingInfo[1] 
 									+ System.getProperty("file.separator") + namingInfo[2] + "_" + namingInfo[3] + "_"+ region
 									+ System.getProperty("file.separator"));
-						}
+//						}
 						filename = "";
 					}
 					if(writePNG && !newFPNG.exists()) {
 						newFPNG.mkdirs();
 					}
+
+					if(writeJPG && !newFJPG.exists()) {
+						newFJPG.mkdirs();
+					}
 					if(writeTif && !newFTif.exists()) {
 						newFTif.mkdirs();
 					}
 					
-					if(writeTif && writePNG) {
+					//TODO
+//					if(writeTif && writePNG) {
 						saveIndividualImages(imp, newFPNG.getAbsolutePath() + System.getProperty("file.separator"),
-							newFTif.getAbsolutePath() + System.getProperty("file.separator"), 
-							filename);							
-					}else if(!writeTif && writePNG){
-						saveIndividualImages(imp, newFPNG.getAbsolutePath() + System.getProperty("file.separator"),
-							newFPNG.getAbsolutePath() + System.getProperty("file.separator"), 
-							filename);							
-					}else if(writeTif && !writePNG){
-						saveIndividualImages(imp, newFTif.getAbsolutePath() + System.getProperty("file.separator"),
+								newFJPG.getAbsolutePath() + System.getProperty("file.separator"), 
 								newFTif.getAbsolutePath() + System.getProperty("file.separator"), 
-								filename);
-					}
+							filename);							
+//					}else if(!writeTif && writePNG){
+//						saveIndividualImages(imp, newFPNG.getAbsolutePath() + System.getProperty("file.separator"),
+//							newFPNG.getAbsolutePath() + System.getProperty("file.separator"), 
+//							filename);							
+//					}else if(writeTif && !writePNG){
+//						saveIndividualImages(imp, newFTif.getAbsolutePath() + System.getProperty("file.separator"),
+//								newFTif.getAbsolutePath() + System.getProperty("file.separator"), 
+//								filename);
+//					}
 					
 					if(writeTifStacks) {
 						if(namingInfo[0].equals("UNKNOWN")) {
@@ -695,13 +722,15 @@ public class Sp8LifToMemento_Main implements PlugIn {
 	
 	/**
 	 * @param channel: 1 <= channel,slice,frame <= # channels,slices,frames
+	 * Added jpg option in version 0.0.9
 	 * */
-	private void saveIndividualImages(ImagePlus imp, String saveFolderPNG, String saveFolderTif, String fileName) {		
+	private void saveIndividualImages(ImagePlus imp, String saveFolderPNG, String saveFolderJPG, String saveFolderTif, String fileName) {		
 		//Making the folders required
 		String indivOutPathPNG;
+		String indivOutPathJPG;
 		String indivOutPathTif;
 		String indivOutAddPath;
-		File indivOutFilePNG, indivOutFileTif;
+		File indivOutFilePNG, indivOutFileJPG, indivOutFileTif;
 		
 		for(int s = 0; s < imp.getNSlices(); s++) {			
 			for(int t = 0; t < imp.getNFrames(); t++) {
@@ -722,6 +751,11 @@ public class Sp8LifToMemento_Main implements PlugIn {
 					indivOutPathPNG = saveFolderPNG + indivOutAddPath;
 					indivOutFilePNG = new File(indivOutPathPNG);
 					if(!indivOutFilePNG.exists()) indivOutFilePNG.mkdir();
+				}
+				if(writeJPG) {
+					indivOutPathJPG = saveFolderJPG + indivOutAddPath;
+					indivOutFileJPG = new File(indivOutPathJPG);
+					if(!indivOutFileJPG.exists()) indivOutFileJPG.mkdir();
 				}
 				if(writeTif) {
 					indivOutPathTif = saveFolderTif + indivOutAddPath;
@@ -781,7 +815,12 @@ public class Sp8LifToMemento_Main implements PlugIn {
 						img = colorToTransparent(bi, Color.BLACK);
 						bi = imageToBuffered(img, bi.getWidth(), bi.getHeight());
 						saveBufferedImageAsPNG(bi, indivOutPathPNG);
-					}					
+					}
+					if(writeJPG) {
+						indivOutPathJPG = saveFolderJPG + indivOutAddPath;
+						bi = impNew.getBufferedImage();
+						saveBufferedImageAsJPG(bi, indivOutPathJPG);
+					}
 					impNew.changes = false;
 					impNew.close();
 				}
@@ -794,6 +833,16 @@ public class Sp8LifToMemento_Main implements PlugIn {
 			ImageIO.write(bi, "png", new File(path));
 		} catch (IOException e) {
 			IJ.error("Saving error PNG");
+			e.printStackTrace();
+		}
+	}
+	
+
+	private static void saveBufferedImageAsJPG(BufferedImage bi, String path) {
+		try {
+			ImageIO.write(bi, "jpg", new File(path));
+		} catch (IOException e) {
+			IJ.error("Saving error JPG");
 			e.printStackTrace();
 		}
 	}
