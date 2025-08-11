@@ -1,7 +1,7 @@
 package sp8LifToMemento_jnh;
 
 /** ===============================================================================
-* Sp8Lif_To_Memento ImageJ/FIJI Plugin v0.0.9
+* Sp8Lif_To_Memento ImageJ/FIJI Plugin v0.0.10
 * 
 * This program is free software; you can redistribute it and/or
 * modify it under the terms of the GNU General Public License
@@ -15,7 +15,7 @@ package sp8LifToMemento_jnh;
 * See the GNU General Public License for more details.
 *  
 * Copyright (C) Jan Niklas Hansen
-* Date: November, 2022 (This Version: August 8, 2025)
+* Date: November, 2022 (This Version: August 11, 2025)
 *   
 * For any questions please feel free to contact me (jan.hansen@scilifelab.se).
 * =============================================================================== */
@@ -58,7 +58,7 @@ import loci.plugins.in.ImporterOptions;
 public class Sp8LifToMemento_Main implements PlugIn {
 	// Name variables
 	static final String PLUGINNAME = "Sp8Lif_To_Memento";
-	static final String PLUGINVERSION = "0.0.9";
+	static final String PLUGINVERSION = "0.0.10";
 
 	// Fix fonts
 	static final Font SuperHeadingFont = new Font("Sansserif", Font.BOLD, 16);
@@ -717,6 +717,12 @@ public class Sp8LifToMemento_Main implements PlugIn {
 		if(seriesName.contains(" Position") && seriesName.contains(": ") && seriesName.contains("; ") && seriesName.contains("(")) {			
 			return seriesName.substring(seriesName.lastIndexOf(" Position")+1,seriesName.lastIndexOf(": "));
 		}
+		
+		//Example seriesName from a .lif tilescan on Stellaris 8: "Series_153: TileScan 2/G/7/P3: 2048 x 2048; 168 planes (4C x 42Z)"
+		if(seriesName.contains("/P") && seriesName.contains(": ") && seriesName.contains("; ") && seriesName.contains("(")) {			
+			return seriesName.substring(seriesName.lastIndexOf("/P")+1,seriesName.lastIndexOf(": "));
+		}
+				
 		return null;
 	}
 	
