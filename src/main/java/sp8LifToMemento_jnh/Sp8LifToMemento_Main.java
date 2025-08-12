@@ -1,7 +1,7 @@
 package sp8LifToMemento_jnh;
 
 /** ===============================================================================
-* Sp8Lif_To_Memento ImageJ/FIJI Plugin v0.0.10
+* Sp8Lif_To_Memento ImageJ/FIJI Plugin v0.0.11
 * 
 * This program is free software; you can redistribute it and/or
 * modify it under the terms of the GNU General Public License
@@ -15,7 +15,7 @@ package sp8LifToMemento_jnh;
 * See the GNU General Public License for more details.
 *  
 * Copyright (C) Jan Niklas Hansen
-* Date: November, 2022 (This Version: August 11, 2025)
+* Date: November, 2022 (This Version: August 12, 2025)
 *   
 * For any questions please feel free to contact me (jan.hansen@scilifelab.se).
 * =============================================================================== */
@@ -58,7 +58,7 @@ import loci.plugins.in.ImporterOptions;
 public class Sp8LifToMemento_Main implements PlugIn {
 	// Name variables
 	static final String PLUGINNAME = "Sp8Lif_To_Memento";
-	static final String PLUGINVERSION = "0.0.10";
+	static final String PLUGINVERSION = "0.0.11";
 
 	// Fix fonts
 	static final Font SuperHeadingFont = new Font("Sansserif", Font.BOLD, 16);
@@ -211,12 +211,44 @@ public class Sp8LifToMemento_Main implements PlugIn {
 			//read and process variables--------------------------------------------------
 			if (gd.wasCanceled()) return;
 			
+			boolean leave = true;
 			if (!writePNG && !writeJPG && !writeTif && !writeTifStacks) {
 				new WaitForUserDialog("You need to select at least one output format (tiff or png or jpg).\nPlease modfiy the settings accordingly!").show();
-			}else {
+				leave = false;
+			}
+			
+			// Validation of file paths specified
+			if (writePNG) {
+				if(!new File(outPathPNG).exists()) {
+					leave = false;
+					new WaitForUserDialog("The specified PNG output file path does not exist.\nMake sure to create the specified folder or correct the path!\n\nSpecified path:\n"+outPathPNG).show();
+				}
+			}
+			if (writeJPG) {
+				if(!new File(outPathJPG).exists()) {
+					leave = false;
+					new WaitForUserDialog("The specified JPG output file path does not exist.\nMake sure to create the specified folder or correct the path!\n\nSpecified path:\n"+outPathJPG).show();
+				}			
+			}
+			if (writeTif) {
+				if(!new File(outPathTif).exists()) {
+					leave = false;
+					new WaitForUserDialog("The specified Tif output file path does not exist.\nMake sure to create the specified folder or correct the path!\n\nSpecified path:\n"+outPathTif).show();
+				}
+			}
+			if (writeTifStacks) {
+				if(!new File(outPathTifStacks).exists()) {
+					leave = false;
+					new WaitForUserDialog("The specified hyperstack-Tif output file path does not exist.\nMake sure to create the specified folder or correct the path!\n\nSpecified path:\n"+outPathTifStacks).show();
+				}
+			}
+			
+			if(leave) {
 				break;
 			}
 		}
+		
+		
 		
 		if(changeCColors) {
 			selectedChannelColors = new String[numberOfChannels];
@@ -294,21 +326,67 @@ public class Sp8LifToMemento_Main implements PlugIn {
 		String tableFileDir = "";
 		String tableFileName = "";
 		String [][] lookUpTable = null;
-		if(relabelSeries){			
-			new WaitForUserDialog("Please open the table .csv file with columns Antibody,Protein,Plate,Well in the following dialog!\n"
-					+"Make sure there is no duplicate entries in the well column and that you provide only information for one plate (the specific plate analyzed)!").show();
-						
-	    	OpenDialog odTable;
-	    	odTable = new OpenDialog("Open table file with columns Antibody,Protein,Plate,Well", null);
-	    	tableFileDir = odTable.getDirectory();
-    		tableFileName = odTable.getFileName();
-    		lookUpTable = getTableFromCSV(tableFileDir + System.getProperty("file.separator") + tableFileName);
-    		if(diagnosisLogging) {
-    			IJ.log("Log of read in csv file:");
-    			for(int i = 0; i < lookUpTable[0].length; i++) {
-            		IJ.log(lookUpTable[0][i] + "	" + lookUpTable[1][i] + "	" + lookUpTable[2][i] + "	" + lookUpTable[3][i]);    	    				
-    			}		
-    		}
+		if(relabelSeries){
+			boolean leave = true;
+			while(true) {
+				new WaitForUserDialog("Please open the table .csv file with columns Antibody,Protein,Plate,Well in the following dialog!\n"
+						+"Make sure there is no duplicate entries in the well column and that you provide only information for one plate (the specific plate analyzed)!").show();
+							
+		    	OpenDialog odTable;
+		    	odTable = new OpenDialog("Open table file with columns Antibody,Protein,Plate,Well", null);
+		    	tableFileDir = odTable.getDirectory();
+	    		tableFileName = odTable.getFileName();
+	    		
+	    		if (tableFileName == null) {
+	    		    IJ.showMessage("Process canceled", "No file was selected.");
+	    		    return;
+	    		}
+	    		
+	    		try {
+	        		lookUpTable = getTableFromCSV(tableFileDir + System.getProperty("file.separator") + tableFileName);
+	        		if(lookUpTable == null) {
+	        			leave = false;
+		    			new WaitForUserDialog("Processing table .csv file failed. Too many columns in table").show();
+	        		}
+	    		}catch(IOException e){
+	    			leave = false;
+	    			new WaitForUserDialog("Loading table .csv file failed.\nFile path does not exist:\n" 
+	    					+ tableFileDir + System.getProperty("file.separator") + tableFileName 
+	    					+ "\nError trace printed in LOG window.").show();
+	    			String out = "";
+					for (int err = 0; err < e.getStackTrace().length; err++) {
+						out += " \n " + e.getStackTrace()[err].toString();
+					}
+					IJ.log("ERROR when loading file " + tableFileDir + System.getProperty("file.separator") + tableFileName 
+							+ "\nError message: " + e.getMessage()
+							+ "\nError localized message: " + e.getLocalizedMessage()
+							+ "\nError cause: " + e.getCause() 
+							+ "\nDetailed message:"
+							+ "\n" + out);
+	    		}catch(Exception e) {
+	    			leave = false;
+	    			new WaitForUserDialog("Error during processing table .csv\nMake sure to load a valid file." 
+	    					+ "\nError trace printed in LOG window.").show();
+	    			String out = "";
+					for (int err = 0; err < e.getStackTrace().length; err++) {
+						out += " \n " + e.getStackTrace()[err].toString();
+					}
+					IJ.log("ERROR when loading file " + tableFileDir + System.getProperty("file.separator") + tableFileName 
+							+ "\nError message: " + e.getMessage()
+							+ "\nError localized message: " + e.getLocalizedMessage()
+							+ "\nError cause: " + e.getCause() 
+							+ "\nDetailed message:"
+							+ "\n" + out);   			
+	    		}
+	    		
+	    		if(diagnosisLogging) {
+	    			IJ.log("Log of read in csv file:");
+	    			for(int i = 0; i < lookUpTable[0].length; i++) {
+	            		IJ.log(lookUpTable[0][i] + "	" + lookUpTable[1][i] + "	" + lookUpTable[2][i] + "	" + lookUpTable[3][i]);    	    				
+	    			}		
+	    		}
+	    		if(leave) break;
+			}
 		}
 		
 		// Bioformats option - screen for series in lif file
@@ -568,7 +646,7 @@ public class Sp8LifToMemento_Main implements PlugIn {
 						saveIndividualImages(imp, newFPNG.getAbsolutePath() + System.getProperty("file.separator"),
 								newFJPG.getAbsolutePath() + System.getProperty("file.separator"), 
 								newFTif.getAbsolutePath() + System.getProperty("file.separator"), 
-							filename);							
+							filename, task);							
 //					}else if(!writeTif && writePNG){
 //						saveIndividualImages(imp, newFPNG.getAbsolutePath() + System.getProperty("file.separator"),
 //							newFPNG.getAbsolutePath() + System.getProperty("file.separator"), 
@@ -642,8 +720,7 @@ public class Sp8LifToMemento_Main implements PlugIn {
 		return process.getSeriesLabel(series);
 	}
 	
-	private static String [][] getTableFromCSV(String filePath){
-		try {
+	private static String [][] getTableFromCSV(String filePath) throws IOException{		
 			FileReader fr = new FileReader(new File(filePath));
 			BufferedReader br = new BufferedReader(fr);
 			String line = "";
@@ -673,19 +750,13 @@ public class Sp8LifToMemento_Main implements PlugIn {
 				line = line.substring(0, line.lastIndexOf(","));
 				out [0][i] = line;
 				if(line.contains(",")) {
-					IJ.error("Processing failed - loaded table file contained too many columns!");
 					return null;
 				}
 			}
 			lines.clear();
 			lines = null;
 			
-			return out;			
-		}catch (IOException e) {
-			IJ.error("Loading table file failed!");
-			e.printStackTrace();
-			return null;
-		}
+			return out;
 	}
 	
 	private static String [] receiveWellInformationFromTable(String seriesName, String [][] table) {
@@ -730,7 +801,7 @@ public class Sp8LifToMemento_Main implements PlugIn {
 	 * @param channel: 1 <= channel,slice,frame <= # channels,slices,frames
 	 * Added jpg option in version 0.0.9
 	 * */
-	private void saveIndividualImages(ImagePlus imp, String saveFolderPNG, String saveFolderJPG, String saveFolderTif, String fileName) {		
+	private void saveIndividualImages(ImagePlus imp, String saveFolderPNG, String saveFolderJPG, String saveFolderTif, String fileName, int task) {		
 		//Making the folders required
 		String indivOutPathPNG;
 		String indivOutPathJPG;
@@ -819,13 +890,23 @@ public class Sp8LifToMemento_Main implements PlugIn {
 						//add transparency, and write image
 						bi = impNew.getBufferedImage();
 						img = colorToTransparent(bi, Color.BLACK);
-						bi = imageToBuffered(img, bi.getWidth(), bi.getHeight());
-						saveBufferedImageAsPNG(bi, indivOutPathPNG);
+						bi = imageToBuffered(img, bi.getWidth(), bi.getHeight());						
+						try {
+							saveBufferedImageAsPNG(bi, indivOutPathPNG);
+						}catch (IOException e) {							
+							progress.notifyMessage("Task " + (task+1) + "/" + tasks + ": ERROR - PNG file could not be saved (Path: "
+									+ indivOutPathPNG + ")!", ProgressDialog.ERROR);
+						}
 					}
 					if(writeJPG) {
 						indivOutPathJPG = saveFolderJPG + indivOutAddPath;
 						bi = impNew.getBufferedImage();
-						saveBufferedImageAsJPG(bi, indivOutPathJPG);
+						try {
+							saveBufferedImageAsJPG(bi, indivOutPathJPG);
+						}catch (IOException e) {							
+					   		progress.notifyMessage("Task " + (task+1) + "/" + tasks + ": ERROR - JPG file could not be saved (Path: "
+					   				+ indivOutPathJPG + ")!", ProgressDialog.ERROR);
+						}
 					}
 					impNew.changes = false;
 					impNew.close();
@@ -834,23 +915,13 @@ public class Sp8LifToMemento_Main implements PlugIn {
 		}
 	}
 	
-	private static void saveBufferedImageAsPNG(BufferedImage bi, String path) {
-		try {
-			ImageIO.write(bi, "png", new File(path));
-		} catch (IOException e) {
-			IJ.error("Saving error PNG");
-			e.printStackTrace();
-		}
+	private static void saveBufferedImageAsPNG(BufferedImage bi, String path) throws IOException {
+		ImageIO.write(bi, "png", new File(path));
 	}
 	
 
-	private static void saveBufferedImageAsJPG(BufferedImage bi, String path) {
-		try {
-			ImageIO.write(bi, "jpg", new File(path));
-		} catch (IOException e) {
-			IJ.error("Saving error JPG");
-			e.printStackTrace();
-		}
+	private static void saveBufferedImageAsJPG(BufferedImage bi, String path) throws IOException {
+		ImageIO.write(bi, "jpg", new File(path));
 	}
 
 	private BufferedImage imageToBuffered (Image inImage, int width, int height){
