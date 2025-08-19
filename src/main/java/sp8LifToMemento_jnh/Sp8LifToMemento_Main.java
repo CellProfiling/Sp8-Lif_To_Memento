@@ -1,7 +1,7 @@
 package sp8LifToMemento_jnh;
 
 /** ===============================================================================
-* Sp8Lif_To_Memento ImageJ/FIJI Plugin v0.0.12
+* Sp8Lif_To_Memento ImageJ/FIJI Plugin v0.0.13
 * 
 * This program is free software; you can redistribute it and/or
 * modify it under the terms of the GNU General Public License
@@ -58,7 +58,7 @@ import loci.plugins.in.ImporterOptions;
 public class Sp8LifToMemento_Main implements PlugIn {
 	// Name variables
 	static final String PLUGINNAME = "Sp8Lif_To_Memento";
-	static final String PLUGINVERSION = "0.0.12";
+	static final String PLUGINVERSION = "0.0.13";
 
 	// Fix fonts
 	static final Font SuperHeadingFont = new Font("Sansserif", Font.BOLD, 16);
@@ -153,7 +153,7 @@ public class Sp8LifToMemento_Main implements PlugIn {
 
 			gd.setInsets(0,0,0);	gd.addMessage("Notes", SubHeadingFont);
 			
-			gd.setInsets(0,0,0);		gd.addMessage("The plugin processes .lif files from 'TileScans' acquired with the Leica Sp8. TileScans here refers to automated", InstructionsFont);
+			gd.setInsets(0,0,0);		gd.addMessage("The plugin processes .lif files from 'TileScans' acquired with a Leica microscope (e.g., Sp8, Stellaris8). TileScans here refers to automated", InstructionsFont);
 			gd.setInsets(0,0,0);		gd.addMessage("   acquisition of many images on a multi-well plates, all stored in one .lif file.", InstructionsFont);
 			gd.setInsets(0,0,0);		gd.addMessage("The plugin generates an output directory with PNGs or JPGs, either of which can be imported to Memento, or with Tiffs", InstructionsFont);
 			gd.setInsets(0,0,0);		gd.addMessage("   for analysis or further processing before importing into memento (e.g., adjustments on the well or column level).", InstructionsFont);		
