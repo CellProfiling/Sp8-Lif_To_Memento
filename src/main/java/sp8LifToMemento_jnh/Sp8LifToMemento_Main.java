@@ -1,7 +1,7 @@
 package sp8LifToMemento_jnh;
 
 /** ===============================================================================
-* Sp8Lif_To_Memento ImageJ/FIJI Plugin v0.0.11
+* Sp8Lif_To_Memento ImageJ/FIJI Plugin v0.0.12
 * 
 * This program is free software; you can redistribute it and/or
 * modify it under the terms of the GNU General Public License
@@ -15,7 +15,7 @@ package sp8LifToMemento_jnh;
 * See the GNU General Public License for more details.
 *  
 * Copyright (C) Jan Niklas Hansen
-* Date: November, 2022 (This Version: August 12, 2025)
+* Date: November, 2022 (This Version: August 19, 2025)
 *   
 * For any questions please feel free to contact me (jan.hansen@scilifelab.se).
 * =============================================================================== */
@@ -58,7 +58,7 @@ import loci.plugins.in.ImporterOptions;
 public class Sp8LifToMemento_Main implements PlugIn {
 	// Name variables
 	static final String PLUGINNAME = "Sp8Lif_To_Memento";
-	static final String PLUGINVERSION = "0.0.11";
+	static final String PLUGINVERSION = "0.0.12";
 
 	// Fix fonts
 	static final Font SuperHeadingFont = new Font("Sansserif", Font.BOLD, 16);
@@ -868,7 +868,7 @@ public class Sp8LifToMemento_Main implements PlugIn {
 					if(!fileName.equals("")) {
 						indivOutAddPath += "_";
 					}					
-					indivOutAddPath += "C" + c + ".png";
+					indivOutAddPath += "C" + c;
 					
 					if(changeCColors && c < selectedChannelColors.length){
 						color = selectedChannelColors [c];
@@ -879,13 +879,13 @@ public class Sp8LifToMemento_Main implements PlugIn {
 					//retrieve image
 					impNew = getIndividualImage(imp, c+1, s+1, t+1, false, color);
 					if(writeTif) {
-						indivOutPathTif = saveFolderTif + indivOutAddPath;
+						indivOutPathTif = saveFolderTif + indivOutAddPath + ".tif";
 						
 						//save tif image
 						IJ.saveAs(impNew, "Tif", indivOutPathTif);
 					}
 					if(writePNG) {
-						indivOutPathPNG = saveFolderPNG + indivOutAddPath;
+						indivOutPathPNG = saveFolderPNG + indivOutAddPath + ".png";
 						
 						//add transparency, and write image
 						bi = impNew.getBufferedImage();
@@ -899,7 +899,7 @@ public class Sp8LifToMemento_Main implements PlugIn {
 						}
 					}
 					if(writeJPG) {
-						indivOutPathJPG = saveFolderJPG + indivOutAddPath;
+						indivOutPathJPG = saveFolderJPG + indivOutAddPath + ".jpg";
 						bi = impNew.getBufferedImage();
 						try {
 							saveBufferedImageAsJPG(bi, indivOutPathJPG);

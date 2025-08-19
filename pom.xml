@@ -11,13 +11,13 @@
  
  	<artifactId>Sp8Lif_To_Memento_JNH</artifactId>
  	<groupId>JNH</groupId>
-    <version>0.0.11-SNAPSHOT</version>
+    <version>0.0.12-SNAPSHOT</version>
  
 <!-- Plugin Information -->
     <name>Sp8Lif_To_Memento_JNH</name>
  	<url>https://github.com/CellProfiling/Sp8-Lif_To_Memento</url>
 	<inceptionYear>2022</inceptionYear>
-	<description>FIJI plugin that reads .lif files from the Sp8 confocal microscope and outputs a file system with PNGs for Memento.</description>
+	<description>FIJI plugin that reads .lif files from Leica microscopes and outputs a file system with Tifs, PNGs, JPGs, or multi-plane tifs for Memento or other applications.</description>
  	<organization>
 		<name>CellProfiling</name>
 		<url>https://github.com/CellProfiling/</url>
