@@ -34,13 +34,13 @@ The plugin can be installed as follows:
 - You can now verify that the plugin is installed by launching it through the menu entry: Plugins > CellProfiling > 
 
 <p align="center">
-   <img src="https://user-images.githubusercontent.com/27991883/206778750-cb6979ab-3416-47c8-a000-d22ee5674a75.png" width=450>
+   <img width=500 alt="menu-entry" src="https://github.com/user-attachments/assets/e95f0cd4-35eb-4d6a-968b-625e2384be9a" />
 </p>
 
 ### Using the plugin
 Launch the plugin via
 <p align="center">
-   <img src="https://user-images.githubusercontent.com/27991883/206778750-cb6979ab-3416-47c8-a000-d22ee5674a75.png" width=450>
+   <img width=500 alt="menu-entry" src="https://github.com/user-attachments/assets/e95f0cd4-35eb-4d6a-968b-625e2384be9a" />
 </p>
 
 A settings dialog is displayed that also guides you through the settings
