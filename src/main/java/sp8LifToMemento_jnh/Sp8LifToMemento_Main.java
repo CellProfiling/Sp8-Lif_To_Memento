@@ -1,7 +1,7 @@
 package sp8LifToMemento_jnh;
 
 /** ===============================================================================
-* Sp8Lif_To_Memento ImageJ/FIJI Plugin v0.0.13
+* Sp8Lif_To_Memento ImageJ/FIJI Plugin v0.0.14
 * 
 * This program is free software; you can redistribute it and/or
 * modify it under the terms of the GNU General Public License
@@ -15,7 +15,7 @@ package sp8LifToMemento_jnh;
 * See the GNU General Public License for more details.
 *  
 * Copyright (C) Jan Niklas Hansen
-* Date: November, 2022 (This Version: August 19, 2025)
+* Date: November, 2022 (This Version: September 22, 2025)
 *   
 * For any questions please feel free to contact me (jan.hansen@scilifelab.se).
 * =============================================================================== */
@@ -41,6 +41,8 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.imageio.ImageIO;
 
@@ -58,7 +60,7 @@ import loci.plugins.in.ImporterOptions;
 public class Sp8LifToMemento_Main implements PlugIn {
 	// Name variables
 	static final String PLUGINNAME = "Sp8Lif_To_Memento";
-	static final String PLUGINVERSION = "0.0.13";
+	static final String PLUGINVERSION = "0.0.14";
 
 	// Fix fonts
 	static final Font SuperHeadingFont = new Font("Sansserif", Font.BOLD, 16);
@@ -774,7 +776,21 @@ public class Sp8LifToMemento_Main implements PlugIn {
 			if(seriesName.contains(wellID)) {
 				return new String[] {table[0][i],table[1][i],table[2][i],table[3][i]};
 			}
-		}		
+		}
+		
+		/*
+		 * If the id was not yet detected, the file is possibly from a manual recording.
+		 * Example seriesName from a .lif file of a manual non-tilescan recording on Sp8: 
+		 * 		"Series_210: A12_2: 2048 x 2048; 4 planes (4C)", from which "A12" would need to be selected returned.
+		 * Let's try to identify the well ID through a REGEX matching
+		 */
+		wellID = extractWellIdentifierFromManualAcquisitionSeriesName(seriesName);
+		for(int i = 0; i < table[3].length; i++) {
+			if(table[3][i].equals(wellID)) {
+				return new String[] {table[0][i],table[1][i],table[2][i],table[3][i]};
+			}
+		}
+		
 		return null;
 	}
 	
@@ -793,8 +809,48 @@ public class Sp8LifToMemento_Main implements PlugIn {
 		if(seriesName.contains("/P") && seriesName.contains(": ") && seriesName.contains("; ") && seriesName.contains("(")) {			
 			return seriesName.substring(seriesName.lastIndexOf("/P")+1,seriesName.lastIndexOf(": "));
 		}
+		
+		//Example seriesName from a .lif non-tilescan manual recording file on Sp8: 
+		//Example for non z recording: "Series_210: A12_2: 2048 x 2048; 4 planes (4C)"
+		if(!seriesName.contains("TileScan") // Sign for it is no TileScan acquisition but manual
+				&& seriesName.contains("Series") // Sign for it is no TileScan acquisition but manual
+				&& seriesName.contains(": ") && seriesName.contains("(")) {
+			return extractRegionNumberFromManualAcquisitionSeriesName(seriesName);
+		}
 				
 		return null;
+	}
+	
+	/***
+	 * Extract well id string from a manually recorded series name
+	 * Example series label: "Series_210: A12_2: 2048 x 2048; 4 planes (4C)", from which "A12" would be returned.
+	 * @param seriesString: The label of the series
+	 * @return String matching the well id.
+	 */
+	private static String extractWellIdentifierFromManualAcquisitionSeriesName(String seriesString) {
+	    java.util.regex.Pattern pattern = Pattern.compile("Series_\\d+:\\s*([A-Za-z]\\d+)");
+	    java.util.regex.Matcher matcher = pattern.matcher(seriesString);
+	    if (matcher.find()) {
+	        return matcher.group(1);
+	    } else {
+	        return null;
+	    }
+	}
+	
+	/***
+	 * Extract region id from a manually recorded series name
+	 * Example series label: "Series_210: A12_2: 2048 x 2048; 4 planes (4C)", from which "2" would be returned.
+	 * @param seriesString: The label of the series
+	 * @return String matching the region number.
+	 */
+	private static String extractRegionNumberFromManualAcquisitionSeriesName(String seriesString) {
+	    Pattern pattern = Pattern.compile("Series_\\d+:\\s*[A-Za-z]\\d+\\D+(\\d+)\\s*:");
+	    Matcher matcher = pattern.matcher(seriesString);
+	    if (matcher.find()) {
+	        return matcher.group(1);
+	    } else {
+	        return null;
+	    }
 	}
 	
 	/**
