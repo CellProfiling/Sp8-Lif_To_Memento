@@ -9,6 +9,22 @@ Contact: jan.hansen (at) scilifelab.se
 ## Licenses
 The plugin and the source code are published under the GNU General Public License v3.0 contained in this repository.
 
+## Archived versions and referencing
+The code and software releases of this software are archived in zenodo at the repository https://zenodo.org/records/15778558
+
+Specific versions can be cited through finding the version sepcific zenodo entry, e.g.,
+- Version v0.0.14: <a href="https://doi.org/10.5281/zenodo.17179314"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.17179314.svg" alt="doi:10.5281/zenodo.17179314"></a>
+- Version v0.0.12: <a href="https://doi.org/10.5281/zenodo.16906976"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.16906976.svg" alt="doi:10.5281/zenodo.16906976"></a>
+- Version v0.0.11: <a href="https://doi.org/10.5281/zenodo.16815800"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.16815800.svg" alt="doi:10.5281/zenodo.16815800"></a>
+- Version v0.0.10: <a href="https://doi.org/10.5281/zenodo.16809133"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.16809133.svg" alt="doi:10.5281/zenodo.16809133"></a>
+- Version v0.0.9: <a href="https://doi.org/10.5281/zenodo.16782445"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.16782445.svg" alt="doi:10.5281/zenodo.16782445"></a>
+- For more versions, browse the [zenodo records](https://zenodo.org/records/17179314).
+
+To generally cite the plugin version independent, you can refer to the general DOI including all versions:
+<p align="center">
+   <a href="https://doi.org/10.5281/zenodo.15778558"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.15778558.svg" alt="DOI"></a>
+</p>
+ 
 ## How to use this plugin?
 This software is a plugin for FIJI (an extended version of the open-source image-analysis software ImageJ, including the BioFormats library from OME, which is needed to properly run this plugin). Thus to use the plugin, you need to first have FIJI downloaded to your computer. FIJI is freely available for dowbload [here](https://imagej.net/downloads). 
 
