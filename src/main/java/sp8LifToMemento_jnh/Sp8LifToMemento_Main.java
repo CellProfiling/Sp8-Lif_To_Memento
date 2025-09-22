@@ -155,8 +155,9 @@ public class Sp8LifToMemento_Main implements PlugIn {
 
 			gd.setInsets(0,0,0);	gd.addMessage("Notes", SubHeadingFont);
 			
-			gd.setInsets(0,0,0);		gd.addMessage("The plugin processes .lif files from 'TileScans' acquired with a Leica microscope (e.g., Sp8, Stellaris8). TileScans here refers to automated", InstructionsFont);
-			gd.setInsets(0,0,0);		gd.addMessage("   acquisition of many images on a multi-well plates, all stored in one .lif file.", InstructionsFont);
+			gd.setInsets(0,0,0);		gd.addMessage("The plugin processes .lif files from 'TileScans' or manual acquisitions with a Leica microscope (e.g., Sp8, Stellaris8).", InstructionsFont);
+			gd.setInsets(0,0,0);		gd.addMessage("TileScans here refers to automated acquisition of many images on a multi-well plates, all stored in one .lif file.", InstructionsFont);
+			gd.setInsets(0,0,0);		gd.addMessage("For manual acquisitions, make sure to name each series in the lif file as <well id>_<position> (e.g., E5_3 would be detected as well E5, region 3)", InstructionsFont);
 			gd.setInsets(0,0,0);		gd.addMessage("The plugin generates an output directory with PNGs or JPGs, either of which can be imported to Memento, or with Tiffs", InstructionsFont);
 			gd.setInsets(0,0,0);		gd.addMessage("   for analysis or further processing before importing into memento (e.g., adjustments on the well or column level).", InstructionsFont);		
 			gd.setInsets(0,0,0);	gd.addMessage("For JPG/PNG output, this plugin will adjust each individual image stack's intensity scale individually. For well", InstructionsFont);		
