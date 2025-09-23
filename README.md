@@ -61,9 +61,8 @@ Launch the plugin via
 
 A settings dialog is displayed that also guides you through the settings
 <p align="center">
-   <img src="https://github.com/user-attachments/assets/2f82d6fa-f361-43b6-84a3-2ff239692e7a" width=450>
+   <img src="https://github.com/user-attachments/assets/1936cca5-58d3-4f10-82f5-721334582ee8" width=600>
 </p>
-
 
 Notes on the settings:
 - You can decide whether you want to export PNGs, JPGs, TIFs, multi-plane and multi-channel tifs (Hyperstacks) or multiple of these output types.
